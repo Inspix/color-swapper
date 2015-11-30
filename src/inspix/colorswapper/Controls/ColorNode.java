@@ -15,6 +15,7 @@ package inspix.colorswapper.Controls;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -66,6 +67,14 @@ public class ColorNode extends AnchorPane implements Initializable {
 
     @FXML
     private Tab rgbTab, hsbTab, hexTab;
+
+    @FXML
+    private CheckBox liveUpdate;
+
+    @FXML
+    private Button resetButton, applyButton, findButton;
+
+    private boolean liveUpdateEnabled;
 
     public ColorNode() {
         originalColor = new SimpleObjectProperty<>(Color.BLACK);
@@ -222,27 +231,36 @@ public class ColorNode extends AnchorPane implements Initializable {
                     clr.getGreen(),
                     clr.getBlue(),
                     value));
+
         });
 
         redSpinner.valueProperty().addListener((obj, o, n) -> {
             Color clr = (Color) destinationColor.getValue();
             Color result = new Color((double) n / 255, clr.getGreen(), clr.getBlue(), clr.getOpacity());
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
         greenSpinner.valueProperty().addListener((obj, o, n) -> {
             Color clr = (Color) destinationColor.getValue();
             Color result = new Color(clr.getRed(), (double) n / 255, clr.getBlue(), clr.getOpacity());
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
         blueSpinner.valueProperty().addListener((obj, o, n) -> {
             Color clr = (Color) destinationColor.getValue();
             Color result = new Color(clr.getRed(), clr.getGreen(), (double) n / 255, clr.getOpacity());
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
         alphaSpinner.valueProperty().addListener((obj, o, n) -> {
             Color clr = (Color) destinationColor.getValue();
             Color result = new Color(clr.getRed(), clr.getGreen(), clr.getBlue(), n);
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
 
         hueSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -250,6 +268,8 @@ public class ColorNode extends AnchorPane implements Initializable {
             Color result = Color.hsb(newValue, clr.getSaturation(), clr.getBrightness(), clr.getOpacity());
 
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
 
         saturationSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -257,6 +277,8 @@ public class ColorNode extends AnchorPane implements Initializable {
             Color result = Color.hsb(clr.getHue(), newValue / 100, clr.getBrightness(), clr.getOpacity());
 
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
         });
 
         brightnessSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -264,6 +286,8 @@ public class ColorNode extends AnchorPane implements Initializable {
             Color result = Color.hsb(clr.getHue(), clr.getSaturation(), newValue / 100, clr.getOpacity());
 
             destinationColor.set(result);
+            if (liveUpdateEnabled)
+                writePixels();
 
         });
     }
@@ -289,6 +313,18 @@ public class ColorNode extends AnchorPane implements Initializable {
         hueSpinnerValue.setValue(clr.getHue());
         saturationSpinnerValue.setValue(clr.getSaturation() * 100);
         brightnessSpinnerValue.setValue(clr.getBrightness() * 100);
+    }
+
+    @FXML
+    private void resetChanges() {
+        writePixels((Color) originalColor.getValue());
+        liveUpdate.setSelected(false);
+        liveUpdateEnabled = false;
+    }
+
+    @FXML
+    private void onCheckBoxChange() {
+        liveUpdateEnabled = liveUpdate.isSelected();
     }
 
     @FXML
@@ -318,6 +354,8 @@ public class ColorNode extends AnchorPane implements Initializable {
         task.setOnSucceeded(e -> {
             countLabel.setEffect(new DropShadow(2, Color.LIME));
             pixels = task.getValue();
+            liveUpdate.setDisable(false);
+            applyButton.setDisable(false);
         });
 
         Thread thread = new Thread(task);
@@ -329,6 +367,11 @@ public class ColorNode extends AnchorPane implements Initializable {
     @FXML
     public void writePixels() {
         Color destination = (Color) destinationColor.get();
+        writePixels(destination);
+        resetButton.setDisable(false);
+    }
+
+    private void writePixels(Color destination) {
         if (pixels.size() > 0)
             for (int i = 0; i < pixels.size(); i++) {
                 Point2D pixel = pixels.get(i);
