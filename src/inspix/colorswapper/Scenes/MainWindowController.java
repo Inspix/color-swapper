@@ -78,15 +78,14 @@ public class MainWindowController implements Initializable{
             distanceY = imageView.getViewport().getMinY() + currentY;
         });
 
-        imageView.setOnMouseDragged(e -> {
+        imageView.setOnMouseDragged(e ->
             imageView.setViewport(
                     new Rectangle2D(
                             distanceX - e.getX(),
                             distanceY - e.getY(),
-                            imageView.getImage().getWidth()* scale,
-                            imageView.getImage().getHeight()* scale));
-
-        });
+                            imageView.getFitWidth()* scale,
+                            imageView.getFitHeight()* scale))
+        );
 
         imageView.setOnScroll(e -> {
             scale += e.getDeltaY() < 0 ? 0.01 : -0.01;
@@ -95,7 +94,7 @@ public class MainWindowController implements Initializable{
             if(scale <=0){
                 scale=0.1;
             }
-            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(),imageView.getViewport().getMinY(),imageView.getImage().getWidth() * scale,imageView.getImage().getHeight() * scale));
+            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(),imageView.getViewport().getMinY(),imageView.getFitWidth() * scale,imageView.getFitHeight() * scale));
 
         });
 
@@ -124,11 +123,12 @@ public class MainWindowController implements Initializable{
             }
             if (wimage != null){
                 scale = 1;
+                imageView.setSmooth(false);
                 imageView.setDisable(false);
                 imageView.setImage(wimage);
-                imageView.setViewport(new Rectangle2D(0,0,wimage.getWidth() * scale,wimage.getHeight() * scale));
+                imageView.setViewport(new Rectangle2D(0,0,imageView.getFitWidth() * scale,imageView.getFitHeight() * scale));
                 scaleFit = wimage.getWidth() / imageView.getFitWidth();
-
+                sidePanel.getChildren().remove(0,sidePanel.getChildren().size());
             }
         });
     }
@@ -145,9 +145,7 @@ public class MainWindowController implements Initializable{
         });
         // TODO: Clipboard Copying
         contextMenu.getItems().addAll(item1,item2,item3);
-        imageView.setOnContextMenuRequested(e -> {
-            contextMenu.show(stage,e.getSceneX(),e.getSceneY());
-        });
+        imageView.setOnContextMenuRequested(e -> contextMenu.show(stage,e.getSceneX(),e.getSceneY()));
     }
 
 
@@ -160,8 +158,8 @@ public class MainWindowController implements Initializable{
         double xClicked = e.getX();
         double yClicked = e.getY();
 
-        int xImage = (int)((xClicked * scale  * scaleFit) + viewPortX);
-        int yImage = (int)((yClicked * scale  * scaleFit) + viewPortY);
+        int xImage = (int)((xClicked * scale) + viewPortX);
+        int yImage = (int)((yClicked * scale) + viewPortY);
 
         if (xImage >= imageView.getImage().getWidth() || xImage < 0)
             return null;
