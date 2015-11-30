@@ -1,3 +1,16 @@
+/*
+ * Copyright year Yuliyan Rusev - Inspix
+ *
+ * ColorNode.java is part of ColorSwapper.
+ *
+ * ColorSwapper is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * ColorSwapper is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with Foobar. If not, see http://www.gnu.org/licenses/.
+ *
+ */
+
 package inspix.colorswapper.Controls;
 
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,9 +36,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-/**
- * Created by Inspix on 30/11/2015.
- */
 public class ColorNode extends AnchorPane implements Initializable {
 
     private SimpleObjectProperty<Paint> destinationColor;
@@ -67,7 +77,7 @@ public class ColorNode extends AnchorPane implements Initializable {
         }
     }
 
-    public ColorNode(WritableImage image){
+    public ColorNode(WritableImage image) {
         this();
         this.pixels = new ArrayList<>();
         this.image = image;
@@ -152,18 +162,18 @@ public class ColorNode extends AnchorPane implements Initializable {
     }
 
     @FXML
-    public void findPixels(){
-        Color original = (Color)originalColor.get();
+    public void findPixels() {
+        Color original = (Color) originalColor.get();
 
         Task<ArrayList<Point2D>> task = new Task<ArrayList<Point2D>>() {
             @Override
             protected ArrayList<Point2D> call() throws Exception {
                 ArrayList<Point2D> result = new ArrayList<>();
-                for (int x = 0; x < image.getWidth(); x++){
+                for (int x = 0; x < image.getWidth(); x++) {
                     for (int y = 0; y < image.getHeight(); y++) {
-                        Color currentPixel = image.getPixelReader().getColor(x,y);
-                        if (Objects.equals(original.toString(), currentPixel.toString())){
-                            result.add(new Point2D(x,y));
+                        Color currentPixel = image.getPixelReader().getColor(x, y);
+                        if (Objects.equals(original.toString(), currentPixel.toString())) {
+                            result.add(new Point2D(x, y));
                             updateMessage(String.valueOf(result.size()));
 
                         }
@@ -176,7 +186,7 @@ public class ColorNode extends AnchorPane implements Initializable {
             countLabel.setText(newValue);
         });
         task.setOnSucceeded(e -> {
-            countLabel.setEffect(new DropShadow(2,Color.LIME));
+            countLabel.setEffect(new DropShadow(2, Color.LIME));
             pixels = task.getValue();
         });
 
@@ -187,13 +197,13 @@ public class ColorNode extends AnchorPane implements Initializable {
     }
 
     @FXML
-    public void writePixels(){
-        Color destination = (Color)destinationColor.get();
+    public void writePixels() {
+        Color destination = (Color) destinationColor.get();
         if (pixels.size() > 0)
-        for (int i = 0; i < pixels.size(); i++) {
-            Point2D pixel = pixels.get(i);
-            image.getPixelWriter().setColor((int)pixel.getX(),(int)pixel.getY(),destination);
-        }
+            for (int i = 0; i < pixels.size(); i++) {
+                Point2D pixel = pixels.get(i);
+                image.getPixelWriter().setColor((int) pixel.getX(), (int) pixel.getY(), destination);
+            }
     }
 
     private int validateValue(String text, TextField editor) {
