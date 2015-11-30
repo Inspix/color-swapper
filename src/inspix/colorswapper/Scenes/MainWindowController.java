@@ -15,6 +15,7 @@ package inspix.colorswapper.Scenes;
 
 import inspix.colorswapper.Controls.ColorNode;
 import inspix.colorswapper.Utils.Toast;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
@@ -32,6 +33,7 @@ import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,7 +52,7 @@ public class MainWindowController implements Initializable{
     ImageView imageView;
 
     @FXML
-    Button btnOpenFile;
+    Button btnOpenFile, btnSave, btnSaveAs;
 
     @FXML
     Circle circle;
@@ -73,6 +75,8 @@ public class MainWindowController implements Initializable{
     @FXML
     Label redLabel, blueLabel, greenLabel, hueLabel, saturationLabel, brightnessLabel, alphaLabel, posXLabel, posYLabel;
 
+    private WritableImage image;
+    private File originalImage;
 
     private ContextMenu contextMenu;
 
@@ -87,6 +91,15 @@ public class MainWindowController implements Initializable{
     public void initialize(URL location, ResourceBundle resources) {
         scale = 1;
         setUpContextMenu();
+        setUpImageView();
+        fileChooser.setTitle("Open Image...");
+        FileChooser.ExtensionFilter png = new FileChooser.ExtensionFilter("Portable Network Graphics", "*.png");
+        fileChooser.getExtensionFilters().add(png);
+        fileChooser.setSelectedExtensionFilter(png);
+    }
+
+
+    private void setUpImageView() {
         imageView.setDisable(true);
         imageView.setEffect(new DropShadow(5, Color.BLACK));
         imageView.setOnMousePressed(e -> {
@@ -97,12 +110,12 @@ public class MainWindowController implements Initializable{
         });
 
         imageView.setOnMouseDragged(e ->
-            imageView.setViewport(
-                    new Rectangle2D(
-                            distanceX - e.getX() * scale,
-                            distanceY - e.getY() * scale,
-                            imageView.getFitWidth()* scale,
-                            imageView.getFitHeight()* scale))
+                imageView.setViewport(
+                        new Rectangle2D(
+                                distanceX - e.getX() * scale,
+                                distanceY - e.getY() * scale,
+                                imageView.getFitWidth() * scale,
+                                imageView.getFitHeight() * scale))
         );
 
         imageView.setOnScroll(e -> {
@@ -113,7 +126,7 @@ public class MainWindowController implements Initializable{
             if (scale <= 0.001) {
                 scale = 0.01;
             }
-            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(),imageView.getViewport().getMinY(),imageView.getFitWidth() * scale,imageView.getFitHeight() * scale));
+            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
 
         });
 
@@ -128,30 +141,56 @@ public class MainWindowController implements Initializable{
             if (color != null)
                 circle.setFill(color);
         });
+    }
 
-        btnOpenFile.setOnAction(e -> {
-            File file = fileChooser.showOpenDialog(stage);
-            WritableImage wimage = null;
-            if (file == null)
-                return;
-            try(FileInputStream is = new FileInputStream(file)){
-                Image image= new Image(is);
-                wimage = new WritableImage(image.getPixelReader(),(int)image.getWidth(),(int)image.getHeight());
+    @FXML
+    void onOpenButtonAction() {
+        if (originalImage != null)
+            fileChooser.setInitialDirectory(originalImage.getParentFile());
+        originalImage = fileChooser.showOpenDialog(stage);
+        WritableImage wimage = null;
+        if (originalImage == null)
+            return;
+        try (FileInputStream is = new FileInputStream(originalImage)) {
+            Image img = new Image(is);
+            wimage = new WritableImage(img.getPixelReader(), (int) img.getWidth(), (int) img.getHeight());
 
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        if (wimage != null) {
+            scale = 1;
+            image = wimage;
+            imageView.setSmooth(false);
+            imageView.setDisable(false);
+            imageView.setImage(wimage);
+            imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
+            scaleFit = wimage.getWidth() / imageView.getFitWidth();
+            sidePanel.getChildren().remove(0, sidePanel.getChildren().size());
+            btnSave.setDisable(false);
+            btnSaveAs.setDisable(false);
+        }
+    }
 
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            if (wimage != null){
-                scale = 1;
-                imageView.setSmooth(false);
-                imageView.setDisable(false);
-                imageView.setImage(wimage);
-                imageView.setViewport(new Rectangle2D(0,0,imageView.getFitWidth() * scale,imageView.getFitHeight() * scale));
-                scaleFit = wimage.getWidth() / imageView.getFitWidth();
-                sidePanel.getChildren().remove(0,sidePanel.getChildren().size());
-            }
-        });
+    @FXML
+    void onSaveButtonAction() {
+        writeImage(originalImage);
+    }
+
+    @FXML
+    void onSaveAsButtonAction() {
+        fileChooser.setInitialDirectory(originalImage.getParentFile());
+        File file = fileChooser.showSaveDialog(stage);
+        writeImage(file);
+    }
+
+    private void writeImage(File file) {
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null),
+                    "png", file);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     @FXML
