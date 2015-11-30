@@ -72,8 +72,8 @@ public class MainWindowController implements Initializable{
         imageView.setDisable(true);
         imageView.setEffect(new DropShadow(5, Color.BLACK));
         imageView.setOnMousePressed(e -> {
-            currentX = e.getX();
-            currentY = e.getY();
+            currentX = e.getX() * scale;
+            currentY = e.getY() * scale;
             distanceX = imageView.getViewport().getMinX() + currentX;
             distanceY = imageView.getViewport().getMinY() + currentY;
         });
@@ -81,18 +81,19 @@ public class MainWindowController implements Initializable{
         imageView.setOnMouseDragged(e ->
             imageView.setViewport(
                     new Rectangle2D(
-                            distanceX - e.getX(),
-                            distanceY - e.getY(),
+                            distanceX - e.getX() * scale,
+                            distanceY - e.getY() * scale,
                             imageView.getFitWidth()* scale,
                             imageView.getFitHeight()* scale))
         );
 
         imageView.setOnScroll(e -> {
             scale += e.getDeltaY() < 0 ? 0.01 : -0.01;
-            if(scale > 50)
-                scale = 50;
-            if(scale <=0){
-                scale=0.1;
+            System.out.println(scale);
+            if (scale > 2)
+                scale = 2;
+            if (scale <= 0.001) {
+                scale = 0.01;
             }
             imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(),imageView.getViewport().getMinY(),imageView.getFitWidth() * scale,imageView.getFitHeight() * scale));
 
