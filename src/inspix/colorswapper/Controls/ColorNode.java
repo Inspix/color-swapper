@@ -108,10 +108,18 @@ public class ColorNode extends AnchorPane implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         destinationColorRectangle.fillProperty().bindBidirectional(destinationColor);
         originalColorRectangle.fillProperty().bindBidirectional(originalColor);
+        originalColorRectangle.setOnMouseClicked(e -> {
+            setDestinationColor(originalColor.get());
+            if (liveUpdate.isSelected()) {
+                writePixels();
+            }
+        });
         setUpRectangles(originalColorRectangle, "Original Color");
         setUpRectangles(destinationColorRectangle, "Destination Color");
         setUpSpinners();
         setUpTabs();
+
+        liveUpdate.setTooltip(new Tooltip("Will decrease the performance, redraws on any value change."));
     }
 
     private void setUpRectangles(Rectangle rect, String toolTipHeader) {
@@ -330,7 +338,7 @@ public class ColorNode extends AnchorPane implements Initializable {
     @FXML
     public void findPixels() {
         Color original = (Color) originalColor.get();
-
+        findButton.setDisable(true);
         Task<ArrayList<Point2D>> task = new Task<ArrayList<Point2D>>() {
             @Override
             protected ArrayList<Point2D> call() throws Exception {
@@ -354,6 +362,7 @@ public class ColorNode extends AnchorPane implements Initializable {
         task.setOnSucceeded(e -> {
             countLabel.setEffect(new DropShadow(2, Color.LIME));
             pixels = task.getValue();
+
             liveUpdate.setDisable(false);
             applyButton.setDisable(false);
         });

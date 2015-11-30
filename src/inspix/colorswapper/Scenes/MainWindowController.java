@@ -25,6 +25,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -35,12 +36,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable{
 
     FileChooser fileChooser = new FileChooser();
     double currentX,currentY, distanceX,distanceY,scale,scaleFit;
+    DecimalFormat f = new DecimalFormat("#.##");
+    DecimalFormat fPercent = new DecimalFormat("#.##%");
 
     @FXML
     ImageView imageView;
@@ -59,6 +63,15 @@ public class MainWindowController implements Initializable{
 
     @FXML
     AnchorPane mainPane;
+
+    @FXML
+    CheckBox additionalInfo;
+
+    @FXML
+    GridPane additionalInfoContainer;
+
+    @FXML
+    Label redLabel, blueLabel, greenLabel, hueLabel, saturationLabel, brightnessLabel, alphaLabel, posXLabel, posYLabel;
 
 
     private ContextMenu contextMenu;
@@ -119,6 +132,8 @@ public class MainWindowController implements Initializable{
         btnOpenFile.setOnAction(e -> {
             File file = fileChooser.showOpenDialog(stage);
             WritableImage wimage = null;
+            if (file == null)
+                return;
             try(FileInputStream is = new FileInputStream(file)){
                 Image image= new Image(is);
                 wimage = new WritableImage(image.getPixelReader(),(int)image.getWidth(),(int)image.getHeight());
@@ -139,6 +154,11 @@ public class MainWindowController implements Initializable{
         });
     }
 
+    @FXML
+    private void onAdditionalInfoChange() {
+        additionalInfoContainer.setVisible(additionalInfo.isSelected());
+    }
+
     private void setUpContextMenu(){
         contextMenu = new ContextMenu();
         MenuItem item1 = new MenuItem("Add for change..");
@@ -153,8 +173,6 @@ public class MainWindowController implements Initializable{
             }
 
             if (alreadySelected) {
-                Toast.setBackgroundColor(Color.rgb(200, 200, 200, 1));
-                Toast.applyChanges();
                 Toast.create(mainPane, Toast.DURATION_SHORT, "Color already selected!");
                 return;
 
@@ -182,11 +200,34 @@ public class MainWindowController implements Initializable{
         int xImage = (int)((xClicked * scale) + viewPortX);
         int yImage = (int)((yClicked * scale) + viewPortY);
 
-        if (xImage >= imageView.getImage().getWidth() || xImage < 0)
+        if (xImage >= imageView.getImage().getWidth() || xImage < 0) {
+            if (additionalInfo.isSelected())
+                updateAdditionalInfo(-1, -1, null);
             return null;
-        if (yImage >= imageView.getImage().getHeight() || yImage < 0)
+        }
+        if (yImage >= imageView.getImage().getHeight() || yImage < 0) {
+            if (additionalInfo.isSelected())
+                updateAdditionalInfo(-1, -1, null);
             return null;
-        return imageView.getImage().getPixelReader().getColor(xImage,yImage);
+        }
+        Color color = imageView.getImage().getPixelReader().getColor(xImage, yImage);
 
+        if (additionalInfo.isSelected())
+            updateAdditionalInfo(xImage, yImage, color);
+
+        return color;
+
+    }
+
+    private void updateAdditionalInfo(int x, int y, Color clr) {
+        posXLabel.setText(String.valueOf(x));
+        posYLabel.setText(String.valueOf(y));
+        alphaLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getOpacity() * 255)));
+        redLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getRed() * 255)));
+        greenLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getGreen() * 255)));
+        blueLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getBlue() * 255)));
+        hueLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getHue())));
+        saturationLabel.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getSaturation())));
+        brightnessLabel.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getBrightness())));
     }
 }

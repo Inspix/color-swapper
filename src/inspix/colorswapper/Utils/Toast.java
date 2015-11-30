@@ -30,9 +30,9 @@ public class Toast {
     public static final double DURATION_LONG = 5;
     private static Insets padding = new Insets(5);
     private static CornerRadii cornerRadii = new CornerRadii(10);
-    private static Color backgroundColor = Color.GRAY;
-    private static Color textColor = Color.BLACK;
-    private static Color borderColor = Color.GRAY;
+    private static Color backgroundColor = Color.rgb(33, 33, 33, 0.7);
+    private static Color textColor = Color.WHITE;
+    private static Color borderColor = Color.TRANSPARENT;
     private static BorderStroke borderStroke = new BorderStroke(borderColor, BorderStrokeStyle.SOLID, cornerRadii, BorderWidths.DEFAULT);
     private static Border border = new Border(borderStroke);
     private static BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, cornerRadii, Insets.EMPTY);
@@ -47,7 +47,7 @@ public class Toast {
         label.setBorder(border);
         label.setBackground(background);
         label.setFont(font);
-        label.setEffect(new DropShadow(2, 2, 2, Color.SLATEGRAY));
+        label.setEffect(new DropShadow(2, 2, 2, Color.rgb(0, 0, 0, 0.7)));
         AnchorPane.setBottomAnchor(label, 5d);
         AnchorPane.setLeftAnchor(label, parent.getWidth() / 2.5);
         parent.getChildren().add(label);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -32,4 +33,70 @@
       <ScrollPane layoutX="975.0" layoutY="39.0" prefHeight="676.0" prefWidth="295.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="980.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="39.0">
             <VBox fx:id="sidePanel" alignment="TOP_CENTER" />
       </ScrollPane>
+   <CheckBox fx:id="additionalInfo" onAction="#onAdditionalInfoChange" alignment="CENTER" layoutX="68.0" layoutY="657.0"
+             mnemonicParsing="false" prefHeight="17.0" prefWidth="125.0" text="Additional Info"/>
+   <GridPane visible="false" fx:id="additionalInfoContainer" layoutX="15.0" layoutY="579.0" prefHeight="74.0"
+             prefWidth="357.0">
+      <columnConstraints>
+         <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="100.0" prefWidth="100.0"/>
+         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="50.0" prefWidth="50.0"/>
+         <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="109.0" minWidth="25.0" prefWidth="25.0"/>
+         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="180.0" minWidth="50.0" prefWidth="50.0"/>
+         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="65.0" prefWidth="65.0"/>
+         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="50.0"/>
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+      </rowConstraints>
+      <children>
+         <Label text="Pixel position X : "/>
+         <Label text="Pixel position Y : " GridPane.rowIndex="1"/>
+         <Label text="Alpha : " GridPane.rowIndex="2"/>
+         <Label text="R : " GridPane.columnIndex="2"/>
+         <Label text="G : " GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+         <Label text="B : " GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+         <Label fx:id="redLabel" prefHeight="27.0" prefWidth="51.0" text="Label" GridPane.columnIndex="3">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label fx:id="greenLabel" prefHeight="27.0" prefWidth="50.0" text="Label" GridPane.columnIndex="3"
+                GridPane.rowIndex="1">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label fx:id="blueLabel" prefHeight="27.0" prefWidth="50.0" text="Label" GridPane.columnIndex="3"
+                GridPane.rowIndex="2">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label fx:id="posXLabel" prefHeight="27.0" prefWidth="54.0" text="Label" GridPane.columnIndex="1">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label fx:id="posYLabel" prefHeight="27.0" prefWidth="55.0" text="Label" GridPane.columnIndex="1"
+                GridPane.rowIndex="1">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label fx:id="alphaLabel" prefHeight="27.0" prefWidth="56.0" text="Label" GridPane.columnIndex="1"
+                GridPane.rowIndex="2">
+            <padding>
+               <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+         </Label>
+         <Label text="Hue : " GridPane.columnIndex="4" GridPane.halignment="RIGHT"/>
+         <Label text="Saturation :" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1"/>
+         <Label text="Brightness : " GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2"/>
+         <Label fx:id="hueLabel" text="Label" GridPane.columnIndex="5"/>
+         <Label fx:id="saturationLabel" text="Label" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+         <Label fx:id="brightnessLabel" text="Label" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
+      </children>
+   </GridPane>
 </AnchorPane>
