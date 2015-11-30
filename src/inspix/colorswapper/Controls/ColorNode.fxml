@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="94.0" prefWidth="260.0" type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Rectangle fx:id="originalColorRectangle" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="40.0" layoutX="14.0" layoutY="16.0" stroke="BLACK" strokeType="INSIDE" width="20.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="8.0" />
+      <Rectangle fx:id="destinationColorRectangle" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="40.0" layoutX="25.0" layoutY="8.0" stroke="BLACK" strokeType="INSIDE" width="20.0" AnchorPane.topAnchor="8.0" />
+      <GridPane layoutX="5.0" layoutY="48.0" prefHeight="40.0" prefWidth="250.0" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="48.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="85.0" minWidth="50.0" prefWidth="50.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="22.0" minHeight="8.0" prefHeight="17.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="46.0" minHeight="10.0" prefHeight="23.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Red" GridPane.halignment="CENTER">
+               <GridPane.margin>
+                  <Insets right="15.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="Green" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+               <GridPane.margin>
+                  <Insets right="15.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="Blue" GridPane.columnIndex="2" GridPane.halignment="CENTER">
+               <GridPane.margin>
+                  <Insets right="15.0" />
+               </GridPane.margin>
+            </Label>
+            <Label alignment="CENTER" text="Alpha" GridPane.columnIndex="3" GridPane.halignment="CENTER">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+            </Label>
+            <Spinner fx:id="redSpinner" GridPane.rowIndex="1" />
+            <Spinner fx:id="greenSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Spinner fx:id="blueSpinner" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Spinner fx:id="alphaSpinner" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+      <Button onAction="#findPixels" layoutX="52.0" layoutY="8.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="79.0" text="Extract All Pixel Positions" textAlignment="CENTER" wrapText="true" AnchorPane.topAnchor="8.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+      </Button>
+      <Button onAction="#writePixels" layoutX="210.0" layoutY="8.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="45.0" text="Apply Color" textAlignment="CENTER" wrapText="true" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+      </Button>
+      <Label alignment="CENTER" layoutX="131.0" layoutY="9.0" prefHeight="17.0" prefWidth="79.0" text="Pixels found" textAlignment="CENTER" />
+      <Label fx:id="countLabel" alignment="CENTER" layoutX="131.0" layoutY="26.0" prefHeight="25.0" prefWidth="79.0" text="0" />
+   </children>
+</fx:root>
