@@ -19,8 +19,9 @@
   ~
   -->
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="inspix.colorswapper.Scenes.MainWindowController">
-   <children>
+<AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="inspix.colorswapper.Scenes.MainWindowController">
       <ImageView fx:id="imageView" fitHeight="540.0" fitWidth="960.0" layoutX="15.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="141.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="305.0" AnchorPane.topAnchor="39.0">
          <viewport>
             <Rectangle2D height="540.0" width="960.0" />
@@ -29,9 +30,6 @@
       <Circle fx:id="circle" fill="#ffffff00" layoutX="38.0" layoutY="680.0" radius="23.0" stroke="BLACK" strokeType="INSIDE" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="15.0" />
       <ColorPicker fx:id="colorPicker" layoutX="68.0" layoutY="678.0" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="68.0" />
       <ScrollPane layoutX="975.0" layoutY="39.0" prefHeight="676.0" prefWidth="295.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="980.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="39.0">
-         <content>
             <VBox fx:id="sidePanel" alignment="TOP_CENTER" />
-         </content>
       </ScrollPane>
-   </children>
 </AnchorPane>

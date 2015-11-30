@@ -14,6 +14,7 @@
 package inspix.colorswapper.Scenes;
 
 import inspix.colorswapper.Controls.ColorNode;
+import inspix.colorswapper.Utils.Toast;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
@@ -23,6 +24,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -54,6 +56,9 @@ public class MainWindowController implements Initializable{
 
     @FXML
     VBox sidePanel;
+
+    @FXML
+    AnchorPane mainPane;
 
 
     private ContextMenu contextMenu;
@@ -140,8 +145,23 @@ public class MainWindowController implements Initializable{
         MenuItem item2 = new MenuItem("Copy HEX Code to Clipboard");
         MenuItem item3 = new MenuItem("Copy RGB Values to Clipboard");
         item1.setOnAction(e -> {
+            Color clr = colorPicker.getValue();
+            boolean alreadySelected = false;
+            for (int i = 0; i < sidePanel.getChildren().size(); i++) {
+                ColorNode colorNode = (ColorNode) sidePanel.getChildren().get(i);
+                alreadySelected = colorNode.getOriginalColor().equals(clr);
+            }
+
+            if (alreadySelected) {
+                Toast.setBackgroundColor(Color.rgb(200, 200, 200, 1));
+                Toast.applyChanges();
+                Toast.create(mainPane, Toast.DURATION_SHORT, "Color already selected!");
+                return;
+
+            }
+
             ColorNode clrNode = new ColorNode((WritableImage)imageView.getImage());
-            clrNode.setOriginalColor(colorPicker.getValue());
+            clrNode.setOriginalColor(clr);
             sidePanel.getChildren().add(clrNode);
         });
         // TODO: Clipboard Copying

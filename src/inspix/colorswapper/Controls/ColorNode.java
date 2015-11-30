@@ -274,6 +274,7 @@ public class ColorNode extends AnchorPane implements Initializable {
                 spinner.increment();
             else
                 spinner.decrement();
+            e.consume();
         });
     }
 
