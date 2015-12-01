@@ -15,7 +15,6 @@ package inspix.colorswapper.Controls;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -34,7 +33,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.concurrent.SynchronousQueue;
 
 public class ColorNode extends AnchorPane implements Initializable {
 
@@ -66,13 +64,16 @@ public class ColorNode extends AnchorPane implements Initializable {
     private Label countLabel, hexLabel;
 
     @FXML
-    private Tab rgbTab, hsbTab, hexTab;
+    private Tab rgbTab, hsbTab, hexTab, colorPickerTab;
 
     @FXML
     private CheckBox liveUpdate;
 
     @FXML
     private Button resetButton, applyButton, findButton;
+
+    @FXML
+    private ColorPicker colorPicker;
 
     private boolean liveUpdateEnabled;
 
@@ -113,6 +114,11 @@ public class ColorNode extends AnchorPane implements Initializable {
             if (liveUpdate.isSelected()) {
                 writePixels();
             }
+        });
+
+        colorPicker.setOnAction(e -> {
+            setDestinationColor(colorPicker.getValue());
+            colorPicker.requestFocus();
         });
         setUpRectangles(originalColorRectangle, "Original Color");
         setUpRectangles(destinationColorRectangle, "Destination Color");
@@ -170,6 +176,10 @@ public class ColorNode extends AnchorPane implements Initializable {
                 hexTextField.setText(hex);
             }
 
+        });
+        colorPickerTab.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                colorPicker.setValue((Color) getDestinationColor());
         });
     }
 
@@ -324,7 +334,7 @@ public class ColorNode extends AnchorPane implements Initializable {
     }
 
     @FXML
-    private void resetChanges() {
+    public void resetChanges() {
         writePixels((Color) originalColor.getValue());
         liveUpdate.setSelected(false);
         liveUpdateEnabled = false;
@@ -431,7 +441,31 @@ public class ColorNode extends AnchorPane implements Initializable {
         this.destinationColor.set(originalColor);
     }
 
+    public void addPixel(Point2D pixel) {
+        pixels.add(pixel);
+    }
+
+    public void updatePixelCount() {
+        countLabel.setText(String.valueOf(pixels.size()));
+    }
+
+    public void findButtonDisable(boolean value) {
+        findButton.setDisable(value);
+    }
+
+    public void enableControlls() {
+        applyButton.setDisable(false);
+        liveUpdate.setDisable(false);
+    }
+
     public ArrayList<Point2D> getPixels() {
         return pixels;
+    }
+
+    public void setPixels(ArrayList<Point2D> pixels) {
+        if (pixels != null && pixels.size() > 0) {
+            this.pixels = pixels;
+            this.findButton.setDisable(true);
+        }
     }
 }

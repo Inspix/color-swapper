@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.*?>
@@ -37,7 +36,7 @@
                 <Font size="10.0"/>
             </font>
         </Button>
-        <Button disable="true" fx:id="applyButton" layoutX="210.0" layoutY="8.0" mnemonicParsing="false"
+        <Button fx:id="applyButton" disable="true" layoutX="210.0" layoutY="8.0" mnemonicParsing="false"
                 onAction="#writePixels" prefHeight="11.0" prefWidth="58.0" text="Apply" textAlignment="CENTER"
                 wrapText="true" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
             <font>
@@ -48,14 +47,14 @@
                textAlignment="CENTER"/>
         <Label fx:id="countLabel" alignment="CENTER" layoutX="131.0" layoutY="26.0" prefHeight="25.0" prefWidth="91.0"
                text="0"/>
-        <CheckBox disable="true" fx:id="liveUpdate" onAction="#onCheckBoxChange" layoutX="53.0" layoutY="33.0"
-                  mnemonicParsing="false" prefHeight="17.0" prefWidth="79.0" text="Live Update">
+        <CheckBox fx:id="liveUpdate" disable="true" layoutX="53.0" layoutY="33.0" mnemonicParsing="false"
+                  onAction="#onCheckBoxChange" prefHeight="17.0" prefWidth="79.0" text="Live Update">
             <font>
                 <Font size="10.0"/>
             </font>
         </CheckBox>
-        <Button disable="true" fx:id="resetButton" onAction="#resetChanges" layoutX="212.0" layoutY="32.0"
-                mnemonicParsing="false" prefHeight="19.0" prefWidth="58.0" text="Reset">
+        <Button fx:id="resetButton" disable="true" layoutX="212.0" layoutY="32.0" mnemonicParsing="false"
+                onAction="#resetChanges" prefHeight="19.0" prefWidth="58.0" text="Reset">
             <font>
                 <Font size="9.0"/>
             </font>
@@ -148,6 +147,13 @@
                             <Font size="14.0"/>
                         </font>
                     </Label>
+                </AnchorPane>
+            </Tab>
+            <Tab fx:id="colorPickerTab" closable="false" text="Color Picker">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="115.0" prefWidth="275.0">
+                    <ColorPicker fx:id="colorPicker" layoutX="14.0" layoutY="14.0" prefHeight="25.0"
+                                 prefWidth="251.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
+                                 AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
                 </AnchorPane>
             </Tab>
         </TabPane>

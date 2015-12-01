@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -30,13 +30,13 @@
             <Rectangle2D height="540.0" width="960.0"/>
         </viewport>
     </ImageView>
-    <Button fx:id="btnOpenFile" onAction="#onOpenButtonAction" layoutX="15.0" layoutY="14.0" mnemonicParsing="false"
-            prefHeight="25.0" prefWidth="92.0"
-            text="Open File" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="7.0"/>
-    <Button fx:id="btnSave" disable="true" onAction="#onSaveButtonAction" layoutX="116.0" layoutY="7.0"
-            mnemonicParsing="false" text="Save"/>
-    <Button fx:id="btnSaveAs" disable="true" onAction="#onSaveAsButtonAction" layoutX="157.0" layoutY="7.0"
-            mnemonicParsing="false" text="Save as.."/>
+    <Button fx:id="btnOpenFile" layoutX="15.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenButtonAction"
+            prefHeight="25.0" prefWidth="92.0" text="Open File" AnchorPane.leftAnchor="15.0"
+            AnchorPane.topAnchor="7.0"/>
+    <Button fx:id="btnSave" disable="true" layoutX="116.0" layoutY="7.0" mnemonicParsing="false"
+            onAction="#onSaveButtonAction" text="Save"/>
+    <Button fx:id="btnSaveAs" disable="true" layoutX="157.0" layoutY="7.0" mnemonicParsing="false"
+            onAction="#onSaveAsButtonAction" text="Save as.."/>
     <Circle fx:id="circle" fill="#ffffff00" layoutX="38.0" layoutY="680.0" radius="23.0" stroke="BLACK"
             strokeType="INSIDE" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="15.0"/>
     <ColorPicker fx:id="colorPicker" layoutX="68.0" layoutY="678.0" AnchorPane.bottomAnchor="17.0"
@@ -46,9 +46,10 @@
         <VBox fx:id="sidePanel" alignment="TOP_CENTER"/>
     </ScrollPane>
     <CheckBox fx:id="additionalInfo" alignment="CENTER" layoutX="68.0" layoutY="657.0" mnemonicParsing="false"
-              onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Additional Info"/>
+              onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Additional Info"
+              AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="68.0"/>
     <GridPane fx:id="additionalInfoContainer" layoutX="15.0" layoutY="579.0" prefHeight="74.0" prefWidth="357.0"
-              visible="false">
+              visible="false" AnchorPane.bottomAnchor="67.0" AnchorPane.leftAnchor="15.0">
         <columnConstraints>
             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="100.0" prefWidth="100.0"/>
             <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="50.0" prefWidth="50.0"/>
@@ -62,7 +63,6 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
             <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
         </rowConstraints>
-        <children>
             <Label text="Pixel position X : "/>
             <Label text="Pixel position Y : " GridPane.rowIndex="1"/>
             <Label text="Alpha : " GridPane.rowIndex="2"/>
@@ -109,7 +109,24 @@
             <Label fx:id="hueLabel" text="None" GridPane.columnIndex="5"/>
             <Label fx:id="saturationLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
             <Label fx:id="brightnessLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
-        </children>
     </GridPane>
+    <Button fx:id="btnResetChanges" layoutX="875.0" layoutY="579.0" mnemonicParsing="false" prefHeight="25.0"
+            prefWidth="125.0" text="Reset Changes" AnchorPane.bottomAnchor="105.0" AnchorPane.rightAnchor="311.0"/>
+    <Button fx:id="btnRemoveSelectedColors" layoutX="867.0" layoutY="618.0" mnemonicParsing="false"
+            onAction="#onRemoveSelectedColorsAction" prefHeight="37.0" prefWidth="125.0" text="Remove Selected Colors"
+            textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="64.0" AnchorPane.rightAnchor="311.0">
+        <font>
+            <Font size="10.0"/>
+        </font>
+    </Button>
+    <Button fx:id="btnFindAllUniquePixels" layoutX="861.0" layoutY="660.0" mnemonicParsing="false"
+            onAction="#onFindUniquePixels" prefHeight="37.0" prefWidth="125.0" text="Find All Unique Pixels"
+            textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="23.0" AnchorPane.rightAnchor="311.0">
+        <font>
+            <Font size="10.0"/>
+        </font>
+    </Button>
+    <CheckBox fx:id="sortColorsCheckBox" alignment="CENTER" contentDisplay="CENTER" layoutX="844.0" layoutY="698.0"
+              mnemonicParsing="false" prefHeight="17.0" prefWidth="125.0" text="Sort By Hue"/>
 
 </AnchorPane>
