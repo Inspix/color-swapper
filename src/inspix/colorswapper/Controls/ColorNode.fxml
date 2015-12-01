@@ -59,7 +59,8 @@
                 <Font size="9.0"/>
             </font>
         </Button>
-        <TabPane layoutY="50.0" prefHeight="81.0" prefWidth="275.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE"
+        <TabPane fx:id="tabPane" layoutY="50.0" prefHeight="81.0" prefWidth="275.0" side="BOTTOM"
+                 tabClosingPolicy="UNAVAILABLE"
                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <Tab fx:id="rgbTab" closable="false" text="RGB">
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="64.0" prefWidth="275.0">

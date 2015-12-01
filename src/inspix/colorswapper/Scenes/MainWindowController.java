@@ -14,14 +14,21 @@
 package inspix.colorswapper.Scenes;
 
 import inspix.colorswapper.Controls.ColorNode;
+import inspix.colorswapper.Utils.ColorHelpers;
 import inspix.colorswapper.Utils.Toast;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -39,6 +46,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -54,7 +62,11 @@ public class MainWindowController implements Initializable {
     ImageView imageView;
 
     @FXML
-    Button btnOpenFile, btnSave, btnSaveAs, btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors;
+    Button btnOpenFile, btnSave, btnSaveAs,
+            btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors;
+
+    @FXML
+    ChoiceBox<String> choiceBoxSort;
 
     @FXML
     Circle circle;
@@ -69,7 +81,7 @@ public class MainWindowController implements Initializable {
     AnchorPane mainPane;
 
     @FXML
-    CheckBox additionalInfo, sortColorsCheckBox;
+    CheckBox additionalInfo;
 
     @FXML
     GridPane additionalInfoContainer;
@@ -94,12 +106,119 @@ public class MainWindowController implements Initializable {
         scale = 1;
         setUpContextMenu();
         setUpImageView();
+
+        setUpChoiceBox();
+
         fileChooser.setTitle("Open Image...");
         FileChooser.ExtensionFilter png = new FileChooser.ExtensionFilter("Portable Network Graphics", "*.png");
         fileChooser.getExtensionFilters().add(png);
         fileChooser.setSelectedExtensionFilter(png);
     }
 
+    private void setUpChoiceBox() {
+        choiceBoxSort.getItems().add("Sort R <= G <= B");
+        choiceBoxSort.getItems().add("Sort H <= S <= V");
+        choiceBoxSort.getItems().add("Sort by alpha");
+        choiceBoxSort.getItems().add("Sort by brightness");
+        choiceBoxSort.getItems().add("Sort by saturation");
+        choiceBoxSort.getItems().add("Sort by hue");
+
+        choiceBoxSort.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            switch (newValue.intValue()) {
+                case 0:
+                    sortRGB();
+                    break;
+                case 1:
+                    sortHSB();
+                    break;
+                case 2:
+                    sortAlpha();
+                    break;
+                case 3:
+                    sortBrightness();
+                    break;
+                case 4:
+                    sortSaturation();
+                    break;
+                case 5:
+                    sortHue();
+                    break;
+            }
+        });
+    }
+
+    //region Sorting
+
+    private void sortHue() {
+        sortHSBpart(0);
+    }
+
+
+    private void sortSaturation() {
+        sortHSBpart(1);
+
+    }
+
+    private void sortBrightness() {
+        sortHSBpart(2);
+    }
+
+    private void sortHSBpart(int part) {
+        ObservableList<Node> worklist = FXCollections.observableArrayList(sidePanel.getChildren());
+        Collections.sort(worklist, (o1, o2) -> {
+            ColorNode n1 = (ColorNode) o1;
+            ColorNode n2 = (ColorNode) o2;
+
+            Color c1 = (Color) n1.getOriginalColor();
+            Color c2 = (Color) n2.getOriginalColor();
+
+            double[] hsb1 = ColorHelpers.RGBtoHSB(c1);
+            double[] hsb2 = ColorHelpers.RGBtoHSB(c2);
+
+
+            return hsb1[part] != hsb2[part] ? hsb1[part] < hsb2[part] ? -1 : 1 : 0;
+        });
+        sidePanel.getChildren().setAll(worklist);
+    }
+
+    private void sortAlpha() {
+        ObservableList<Node> worklist = FXCollections.observableArrayList(sidePanel.getChildren());
+        worklist.sort((o1, o2) -> {
+            ColorNode n1 = (ColorNode) o1;
+            ColorNode n2 = (ColorNode) o2;
+
+            Color c1 = (Color) n1.getOriginalColor();
+            Color c2 = (Color) n2.getOriginalColor();
+
+            double opacity1 = c1.getOpacity();
+            double opacity2 = c2.getOpacity();
+
+            return opacity1 != opacity2 ? opacity1 < opacity2 ? -1 : 1 : 0;
+        });
+        sidePanel.getChildren().setAll(worklist);
+
+    }
+
+    private void sortHSB() {
+        ObservableList<Node> worklist = FXCollections.observableArrayList(sidePanel.getChildren());
+        worklist.sort((o1, o2) -> {
+            ColorNode n1 = (ColorNode) o1;
+            ColorNode n2 = (ColorNode) o2;
+            return ColorHelpers.compareHSB((Color) n1.getOriginalColor(), (Color) n2.getOriginalColor());
+        });
+        sidePanel.getChildren().setAll(worklist);
+    }
+
+    private void sortRGB() {
+        ObservableList<Node> worklist = FXCollections.observableArrayList(sidePanel.getChildren());
+        worklist.sort((o1, o2) -> {
+            ColorNode n1 = (ColorNode) o1;
+            ColorNode n2 = (ColorNode) o2;
+            return ColorHelpers.compareRGB((Color) n1.getOriginalColor(), (Color) n2.getOriginalColor());
+        });
+        sidePanel.getChildren().setAll(worklist);
+    }
+    //endregion
 
     private void setUpImageView() {
         imageView.setDisable(true);
@@ -166,7 +285,7 @@ public class MainWindowController implements Initializable {
         if (wimage != null) {
             scale = 1;
             image = wimage;
-            imageView.setSmooth(false);
+            imageView.setSmooth(true);
             imageView.setDisable(false);
             imageView.setImage(wimage);
             imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
@@ -199,62 +318,30 @@ public class MainWindowController implements Initializable {
         sidePanel.getChildren().clear();
     }
 
-    private class TaskExtension extends Task<Map<Color, ColorNode>> {
 
-        private boolean sort;
-
-        public TaskExtension(boolean sort) {
-            super();
-            this.sort = sort;
-        }
-
-        @Override
-        protected Map<Color, ColorNode> call() throws Exception {
-            Map<Color, ColorNode> pixels = new HashMap<>();
-            long pixelsToCheck = (long) image.getWidth() * (long) image.getHeight();
-            long progress = 0;
-            for (int x = 0; x < image.getWidth(); x++) {
-                for (int y = 0; y < image.getHeight(); y++) {
-                    Color current = image.getPixelReader().getColor(x, y);
-                    Point2D coords = new Point2D(x, y);
-                    if (pixels.containsKey(current)) {
-                        pixels.get(current).addPixel(coords);
-                        if (!sort) {
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pixels.get(current).updatePixelCount();
-                                }
-                            });
-                        }
-                    } else {
-                        ColorNode clrNode = new ColorNode(image);
-                        clrNode.setOriginalColor(current);
-                        clrNode.findButtonDisable(true);
-                        clrNode.addPixel(coords);
-                        if (!sort) {
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    sidePanel.getChildren().add(clrNode);
-                                    clrNode.updatePixelCount();
-                                }
-                            });
-                        }
-                        pixels.put(current, clrNode);
-                    }
-                    updateProgress(++progress, pixelsToCheck);
-                }
-            }
-
-            pixels.forEach((color, colorNode) -> colorNode.enableControlls());
-            return pixels;
-        }
+    @FXML
+    void onRGBTabButtonAction() {
+        changeAllTabs(0);
     }
 
     @FXML
+    void onHSBTabButtonAction() {
+        changeAllTabs(1);
+    }
+
+    @FXML
+    void onHEXTabButtonAction() {
+        changeAllTabs(2);
+    }
+
+    private void changeAllTabs(int i) {
+        sidePanel.getChildren().forEach(node -> ((ColorNode) node).changeTab(i));
+    }
+    //endregion
+
+    @FXML
     void onFindUniquePixels() {
-        TaskExtension task = new TaskExtension(sortColorsCheckBox.isSelected());
+        Task task = createFindTask();
 
         ProgressBar progressBar = new ProgressBar(0);
         AnchorPane.setBottomAnchor(progressBar, 5d);
@@ -264,28 +351,7 @@ public class MainWindowController implements Initializable {
 
         task.setOnSucceeded(e -> {
             mainPane.getChildren().remove(progressBar);
-            if (sortColorsCheckBox.isSelected()) {
-                SortedMap<Color, ColorNode> map = new TreeMap<>(
-                        (Comparator<Color>) (o1, o2) -> {
-                            long one = colorToInt(o1);
-                            long two = colorToInt(o2);
-                            long result = one - two;
-                            System.out.println(one + " : " + two + " - " + result);
-
-                            if (result == 0) {
-                                return 0;
-                            } else {
-                                return one > two ? 1 : -1;
-                            }
-                        });
-                map.putAll(task.getValue());
-                map.forEach((color, colorNode) -> {
-                    sidePanel.getChildren().add(colorNode);
-                    colorNode.updatePixelCount();
-                });
-                Toast.create(mainPane, Toast.DURATION_LONG, String.valueOf(map.size()));
-            } else
-                Toast.create(mainPane, Toast.DURATION_LONG, String.valueOf(sidePanel.getChildren().size()));
+            Toast.create(mainPane, Toast.DURATION_LONG, "Colors found:" + String.valueOf(sidePanel.getChildren().size()));
         });
 
         Thread thread = new Thread(task);
@@ -294,15 +360,48 @@ public class MainWindowController implements Initializable {
 
     }
 
-    private long colorToInt(Color clr) {
-        int r = (int) (clr.getHue());
-        int g = (int) (clr.getSaturation() * 100);
-        int b = (int) (clr.getBrightness() * 100);
+    private Task<Map<Color, ColorNode>> createFindTask() {
+        return new Task<Map<Color, ColorNode>>() {
+            @Override
+            protected Map<Color, ColorNode> call() throws Exception {
+                Map<Color, ColorNode> pixels = new HashMap<>();
+                long pixelsToCheck = (long) image.getWidth() * (long) image.getHeight();
+                long progress = 0;
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getHeight(); y++) {
+                        Color current = image.getPixelReader().getColor(x, y);
+                        Point2D coords = new Point2D(x, y);
+                        if (pixels.containsKey(current)) {
+                            pixels.get(current).addPixel(coords);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pixels.get(current).updatePixelCount();
+                                }
+                            });
+                        } else {
+                            ColorNode clrNode = new ColorNode(image);
+                            clrNode.setOriginalColor(current);
+                            clrNode.findButtonDisable(true);
+                            clrNode.addPixel(coords);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    sidePanel.getChildren().add(clrNode);
+                                    clrNode.updatePixelCount();
+                                }
+                            });
+                            pixels.put(current, clrNode);
+                        }
+                        updateProgress(++progress, pixelsToCheck);
+                    }
+                }
 
-        return r << 24 | g << 8 | b;
-
+                pixels.forEach((color, colorNode) -> colorNode.enableControlls());
+                return pixels;
+            }
+        };
     }
-    //endregion
 
     private void writeImage(File file) {
         try {

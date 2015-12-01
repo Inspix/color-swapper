@@ -14,6 +14,7 @@
 package inspix.colorswapper.Controls;
 
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableArray;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,6 +66,9 @@ public class ColorNode extends AnchorPane implements Initializable {
 
     @FXML
     private Tab rgbTab, hsbTab, hexTab, colorPickerTab;
+
+    @FXML
+    private TabPane tabPane;
 
     @FXML
     private CheckBox liveUpdate;
@@ -467,5 +471,9 @@ public class ColorNode extends AnchorPane implements Initializable {
             this.pixels = pixels;
             this.findButton.setDisable(true);
         }
+    }
+
+    public void changeTab(int index) {
+        tabPane.getSelectionModel().select(index);
     }
 }
