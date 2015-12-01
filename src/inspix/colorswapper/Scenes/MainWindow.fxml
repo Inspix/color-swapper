@@ -24,13 +24,6 @@
 <AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="inspix.colorswapper.Scenes.MainWindowController">
-    <ImageView fx:id="imageView" fitHeight="540.0" fitWidth="960.0" layoutX="15.0" layoutY="39.0" pickOnBounds="true"
-               preserveRatio="true" AnchorPane.bottomAnchor="141.0" AnchorPane.leftAnchor="15.0"
-               AnchorPane.rightAnchor="305.0" AnchorPane.topAnchor="39.0">
-        <viewport>
-            <Rectangle2D height="540.0" width="960.0"/>
-        </viewport>
-    </ImageView>
     <Button fx:id="btnOpenFile" layoutX="15.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenButtonAction"
             prefHeight="25.0" prefWidth="92.0" text="Open File" AnchorPane.leftAnchor="15.0"
             AnchorPane.topAnchor="7.0"/>
@@ -42,79 +35,275 @@
             strokeType="INSIDE" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="15.0"/>
     <ColorPicker fx:id="colorPicker" layoutX="68.0" layoutY="678.0" AnchorPane.bottomAnchor="17.0"
                  AnchorPane.leftAnchor="68.0"/>
-    <ScrollPane layoutX="975.0" layoutY="39.0" prefHeight="676.0" prefWidth="295.0" AnchorPane.bottomAnchor="5.0"
-                AnchorPane.leftAnchor="980.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="39.0">
+    <ScrollPane fx:id="scrollPane" layoutX="975.0" layoutY="39.0" prefHeight="676.0" prefWidth="295.0"
+                AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="980.0" AnchorPane.rightAnchor="5.0"
+                AnchorPane.topAnchor="39.0">
         <VBox fx:id="sidePanel" alignment="TOP_CENTER"/>
     </ScrollPane>
     <CheckBox fx:id="additionalInfo" alignment="CENTER" layoutX="68.0" layoutY="657.0" mnemonicParsing="false"
-              onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Additional Info"
+              onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Current Info"
               AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="68.0"/>
-    <GridPane fx:id="additionalInfoContainer" layoutX="15.0" layoutY="579.0" prefHeight="74.0" prefWidth="357.0"
-              visible="false" AnchorPane.bottomAnchor="67.0" AnchorPane.leftAnchor="15.0">
+    <GridPane fx:id="additionalInfoContainer" layoutX="207.0" layoutY="657.0" prefHeight="46.0" prefWidth="269.0"
+              visible="false" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="207.0"
+              AnchorPane.rightAnchor="804.0">
         <columnConstraints>
-            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="100.0" prefWidth="100.0"/>
-            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="50.0" prefWidth="50.0"/>
-            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="109.0" minWidth="25.0" prefWidth="25.0"/>
-            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="180.0" minWidth="50.0" prefWidth="50.0"/>
-            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="65.0" prefWidth="65.0"/>
-            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="50.0"/>
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="106.0" minWidth="80.0" prefWidth="80.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="51.0" minWidth="30.0" prefWidth="30.0"/>
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="109.0" minWidth="22.0" prefWidth="22.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="180.0" minWidth="35.0" prefWidth="35.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="58.0" prefWidth="59.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="35.0" prefWidth="92.0"/>
         </columnConstraints>
         <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
             <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
             <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
         </rowConstraints>
-        <Label text="Pixel position X : "/>
-        <Label text="Pixel position Y : " GridPane.rowIndex="1"/>
-        <Label text="Alpha : " GridPane.rowIndex="2"/>
-        <Label text="R : " GridPane.columnIndex="2"/>
-        <Label text="G : " GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-        <Label text="B : " GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+        <Label prefHeight="15.0" prefWidth="76.0" text="Pixel position X : ">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label prefHeight="15.0" prefWidth="76.0" text="Pixel position Y : " GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Alpha : " GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="R : " GridPane.columnIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="G : " GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="B : " GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
             <Label fx:id="redLabel" prefHeight="27.0" prefWidth="51.0" text="None" GridPane.columnIndex="3">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+                <font>
+                    <Font size="10.0"/>
+                </font>
             </Label>
         <Label fx:id="greenLabel" prefHeight="27.0" prefWidth="50.0" text="None" GridPane.columnIndex="3"
                GridPane.rowIndex="1">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
             </Label>
         <Label fx:id="blueLabel" prefHeight="27.0" prefWidth="50.0" text="None" GridPane.columnIndex="3"
                GridPane.rowIndex="2">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
             </Label>
             <Label fx:id="posXLabel" prefHeight="27.0" prefWidth="54.0" text="-1" GridPane.columnIndex="1">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+                <font>
+                    <Font size="10.0"/>
+                </font>
             </Label>
         <Label fx:id="posYLabel" prefHeight="27.0" prefWidth="55.0" text="-1" GridPane.columnIndex="1"
                GridPane.rowIndex="1">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
             </Label>
         <Label fx:id="alphaLabel" prefHeight="27.0" prefWidth="56.0" text="None" GridPane.columnIndex="1"
                GridPane.rowIndex="2">
                 <padding>
                     <Insets bottom="5.0" right="5.0" top="5.0"/>
                 </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
             </Label>
-        <Label text="Hue : " GridPane.columnIndex="4" GridPane.halignment="RIGHT"/>
-        <Label text="Saturation :" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1"/>
-        <Label text="Brightness : " GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2"/>
-        <Label fx:id="hueLabel" text="None" GridPane.columnIndex="5"/>
-        <Label fx:id="saturationLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
-        <Label fx:id="brightnessLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
+        <Label text="Hue : " GridPane.columnIndex="4" GridPane.halignment="RIGHT">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Saturation :" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Brightness : " GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="hueLabel" text="None" GridPane.columnIndex="5">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="saturationLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="brightnessLabel" text="None" GridPane.columnIndex="5" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+    </GridPane>
+    <GridPane fx:id="additionalInfoContainerOriginal" layoutX="207.0" layoutY="602.0" prefHeight="46.0"
+              prefWidth="269.0" visible="false" AnchorPane.bottomAnchor="72.0" AnchorPane.leftAnchor="207.0">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="106.0" minWidth="80.0" prefWidth="80.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="51.0" minWidth="30.0" prefWidth="30.0"/>
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="109.0" minWidth="22.0" prefWidth="22.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="180.0" minWidth="35.0" prefWidth="35.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="58.0" prefWidth="59.0"/>
+            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="273.0" minWidth="35.0" prefWidth="92.0"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
+        </rowConstraints>
+        <Label prefHeight="15.0" prefWidth="76.0" text="Pixel position X : ">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label prefHeight="15.0" prefWidth="76.0" text="Pixel position Y : " GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Alpha : " GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="R : " GridPane.columnIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="G : " GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="B : " GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="redLabelOriginal" prefHeight="27.0" prefWidth="51.0" text="None" GridPane.columnIndex="3">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="greenLabelOriginal" prefHeight="27.0" prefWidth="50.0" text="None" GridPane.columnIndex="3"
+               GridPane.rowIndex="1">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="blueLabelOriginal" prefHeight="27.0" prefWidth="50.0" text="None" GridPane.columnIndex="3"
+               GridPane.rowIndex="2">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="posXLabelOriginal" prefHeight="27.0" prefWidth="54.0" text="-1" GridPane.columnIndex="1">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="posYLabelOriginal" prefHeight="27.0" prefWidth="55.0" text="-1" GridPane.columnIndex="1"
+               GridPane.rowIndex="1">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="alphaLabelOriginal" prefHeight="27.0" prefWidth="56.0" text="None" GridPane.columnIndex="1"
+               GridPane.rowIndex="2">
+            <padding>
+                <Insets bottom="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Hue : " GridPane.columnIndex="4" GridPane.halignment="RIGHT">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Saturation :" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label text="Brightness : " GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="hueLabelOriginal" text="None" GridPane.columnIndex="5">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="saturationLabelOriginal" text="None" GridPane.columnIndex="5" GridPane.rowIndex="1">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
+        <Label fx:id="brightnessLabelOriginal" text="None" GridPane.columnIndex="5" GridPane.rowIndex="2">
+            <font>
+                <Font size="10.0"/>
+            </font>
+        </Label>
     </GridPane>
     <Button fx:id="btnResetChanges" layoutX="875.0" layoutY="579.0" mnemonicParsing="false"
             onAction="#onResetChangesButtonAction" prefHeight="25.0" prefWidth="125.0" text="Reset Changes"
             AnchorPane.bottomAnchor="105.0" AnchorPane.rightAnchor="311.0"/>
-    <Button fx:id="btnRemoveSelectedColors" layoutX="867.0" layoutY="618.0" mnemonicParsing="false"
+    <Button fx:id="btnRemoveSelectedColors" disable="true" layoutX="844.0" layoutY="619.0" mnemonicParsing="false"
             onAction="#onRemoveSelectedColorsAction" prefHeight="37.0" prefWidth="125.0" text="Remove Selected Colors"
             textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="64.0" AnchorPane.rightAnchor="311.0">
         <font>
@@ -128,14 +317,30 @@
             <Font size="10.0"/>
         </font>
     </Button>
-    <ChoiceBox fx:id="choiceBoxSort" layoutX="1116.0" layoutY="7.0" prefHeight="25.0" prefWidth="125.0"
-               AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="7.0"/>
-    <Button onAction="#onRGBTabButtonAction" layoutX="1030.0" layoutY="7.0" mnemonicParsing="false" text="RGB"
+    <Button layoutX="1030.0" layoutY="7.0" mnemonicParsing="false" onAction="#onRGBTabButtonAction" text="RGB"
             AnchorPane.rightAnchor="221.0" AnchorPane.topAnchor="7.0"/>
-    <Button onAction="#onHSBTabButtonAction" layoutX="1069.0" layoutY="7.0" mnemonicParsing="false" text="HSB"
+    <Button layoutX="1069.0" layoutY="7.0" mnemonicParsing="false" onAction="#onHSBTabButtonAction" text="HSB"
             AnchorPane.rightAnchor="178.0" AnchorPane.topAnchor="7.0"/>
-    <Button onAction="#onHEXTabButtonAction" layoutX="1084.0" layoutY="7.0" mnemonicParsing="false" text="HEX"
+    <Button layoutX="1084.0" layoutY="7.0" mnemonicParsing="false" onAction="#onHEXTabButtonAction" text="HEX"
             AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="7.0"/>
-    <Label layoutX="980.0" layoutY="11.0" text="Tab:" AnchorPane.rightAnchor="277.0" AnchorPane.topAnchor="11.0"/>
+    <Label layoutX="990.0" layoutY="11.0" text="Tab:" AnchorPane.rightAnchor="267.0" AnchorPane.topAnchor="11.0"/>
+    <Pane fx:id="imageViewContainer" layoutX="16.0" layoutY="39.0" prefHeight="540.0" prefWidth="960.0"
+          AnchorPane.leftAnchor="16.0" AnchorPane.topAnchor="39.0">
+        <ImageView fx:id="imageView" fitHeight="540.0" fitWidth="960.0" pickOnBounds="true" preserveRatio="true" x="1.0"
+                   y="1.0">
+            <viewport>
+                <Rectangle2D height="540.0" width="960.0"/>
+            </viewport>
+        </ImageView>
+    </Pane>
+    <Circle fx:id="circleOriginal" fill="#ffffff00" layoutX="39.0" layoutY="625.0" radius="23.0" stroke="BLACK"
+            strokeType="INSIDE" AnchorPane.bottomAnchor="72.0" AnchorPane.leftAnchor="16.0"/>
+    <ColorPicker fx:id="colorPickerOriginal" layoutX="69.0" layoutY="623.0" AnchorPane.bottomAnchor="72.0"
+                 AnchorPane.leftAnchor="69.0"/>
+    <CheckBox fx:id="additionalInfoOriginal" alignment="CENTER" layoutX="69.0" layoutY="602.0" mnemonicParsing="false"
+              onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Original Info"
+              AnchorPane.bottomAnchor="101.0" AnchorPane.leftAnchor="69.0"/>
+    <ComboBox fx:id="comboBoxSort" disable="true" layoutX="1151.0" layoutY="7.0" prefHeight="25.0" prefWidth="125.0"
+              promptText="Sorting" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="7.0"/>
 
 </AnchorPane>

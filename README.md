@@ -9,6 +9,7 @@ A simple application to quickly change selected color from an image to another. 
 - RGB,HSB Color manipulation, setting with HEX on my TODO list.
 - Useful tooltip on the selected colors for easy comparison.
 - Live preview.
+- You can click on the color preview to change the values back to the original color.
 
 ###### To do:
 1. ~~Save changes to source file or to other.~~

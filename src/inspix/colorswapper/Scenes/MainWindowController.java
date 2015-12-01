@@ -18,35 +18,30 @@ import inspix.colorswapper.Utils.ColorHelpers;
 import inspix.colorswapper.Utils.Toast;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.InputEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,42 +54,40 @@ public class MainWindowController implements Initializable {
 
     //region FXML Fields
     @FXML
+    AnchorPane mainPane;
+    @FXML
+    Button btnOpenFile, btnSave, btnSaveAs, btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors;
+    @FXML
     ImageView imageView;
-
     @FXML
-    Button btnOpenFile, btnSave, btnSaveAs,
-            btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors;
-
+    Circle circle, circleOriginal;
     @FXML
-    ChoiceBox<String> choiceBoxSort;
-
+    ColorPicker colorPicker, colorPickerOriginal;
     @FXML
-    Circle circle;
-
+    CheckBox additionalInfo, additionalInfoOriginal;
     @FXML
-    ColorPicker colorPicker;
-
+    ComboBox<String> comboBoxSort;
+    @FXML
+    GridPane additionalInfoContainer, additionalInfoContainerOriginal;
+    @FXML
+    Label redLabel, blueLabel, greenLabel, hueLabel, saturationLabel, brightnessLabel, alphaLabel, posXLabel, posYLabel,
+            redLabelOriginal, blueLabelOriginal, greenLabelOriginal, hueLabelOriginal, saturationLabelOriginal,
+            brightnessLabelOriginal, alphaLabelOriginal, posXLabelOriginal, posYLabelOriginal;
+    @FXML
+    Pane imageViewContainer;
+    @FXML
+    ScrollPane scrollPane;
     @FXML
     VBox sidePanel;
-
-    @FXML
-    AnchorPane mainPane;
-
-    @FXML
-    CheckBox additionalInfo;
-
-    @FXML
-    GridPane additionalInfoContainer;
-
-    @FXML
-    Label redLabel, blueLabel, greenLabel, hueLabel, saturationLabel, brightnessLabel, alphaLabel, posXLabel, posYLabel;
     //endregion
 
     //region Fields
     private WritableImage image;
-    private File originalImage;
+    private Image original;
+    private File imageFile;
     private ContextMenu contextMenu;
     private Stage stage;
+    boolean dragged;
     FileChooser fileChooser = new FileChooser();
     double currentX, currentY, distanceX, distanceY, scale, scaleFit;
     DecimalFormat f = new DecimalFormat("#.##");
@@ -106,8 +99,11 @@ public class MainWindowController implements Initializable {
         scale = 1;
         setUpContextMenu();
         setUpImageView();
-
         setUpChoiceBox();
+        DropShadow shadow = new DropShadow(BlurType.ONE_PASS_BOX, Color.color(0, 0, 0, 0.5), 2, 0, 2, 2);
+
+        circle.setEffect(shadow);
+        circleOriginal.setEffect(shadow);
 
         fileChooser.setTitle("Open Image...");
         FileChooser.ExtensionFilter png = new FileChooser.ExtensionFilter("Portable Network Graphics", "*.png");
@@ -116,14 +112,14 @@ public class MainWindowController implements Initializable {
     }
 
     private void setUpChoiceBox() {
-        choiceBoxSort.getItems().add("Sort R <= G <= B");
-        choiceBoxSort.getItems().add("Sort H <= S <= V");
-        choiceBoxSort.getItems().add("Sort by alpha");
-        choiceBoxSort.getItems().add("Sort by brightness");
-        choiceBoxSort.getItems().add("Sort by saturation");
-        choiceBoxSort.getItems().add("Sort by hue");
+        comboBoxSort.getItems().add("Sort R <= G <= B");
+        comboBoxSort.getItems().add("Sort H <= S <= V");
+        comboBoxSort.getItems().add("Sort by hue");
+        comboBoxSort.getItems().add("Sort by saturation");
+        comboBoxSort.getItems().add("Sort by brightness");
+        comboBoxSort.getItems().add("Sort by alpha");
 
-        choiceBoxSort.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+        comboBoxSort.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
             switch (newValue.intValue()) {
                 case 0:
                     sortRGB();
@@ -132,36 +128,108 @@ public class MainWindowController implements Initializable {
                     sortHSB();
                     break;
                 case 2:
-                    sortAlpha();
+                    sortHSBpart(0);
                     break;
                 case 3:
-                    sortBrightness();
+                    sortHSBpart(1);
                     break;
                 case 4:
-                    sortSaturation();
+                    sortHSBpart(2);
                     break;
                 case 5:
-                    sortHue();
+                    sortAlpha();
                     break;
             }
         });
     }
 
+    private void setUpContextMenu() {
+        contextMenu = new ContextMenu();
+        MenuItem item1 = new MenuItem("Add for change..");
+        MenuItem item2 = new MenuItem("Copy HEX Code to Clipboard");
+        MenuItem item3 = new MenuItem("Copy RGB Values to Clipboard");
+        item1.setOnAction(e -> {
+            Color clr = colorPicker.getValue();
+            boolean alreadySelected = false;
+            for (int i = 0; i < sidePanel.getChildren().size(); i++) {
+                ColorNode colorNode = (ColorNode) sidePanel.getChildren().get(i);
+                alreadySelected = colorNode.getOriginalColor().equals(clr);
+                if (alreadySelected) {
+                    Toast.create(mainPane, Toast.DURATION_SHORT, "Color already selected!");
+                    return;
+                }
+            }
+
+            ColorNode clrNode = new ColorNode((WritableImage) imageView.getImage());
+            clrNode.setFocusTraversable(false);
+            clrNode.setOriginalColor(clr);
+            sidePanel.getChildren().add(clrNode);
+            comboBoxSort.setDisable(false);
+            btnFindAllUniquePixels.setDisable(true);
+        });
+        // TODO: Clipboard Copying
+        contextMenu.getItems().addAll(item1, item2, item3);
+        imageView.setOnContextMenuRequested(e -> contextMenu.show(stage, e.getSceneX(), e.getSceneY()));
+    }
+
+    private void setUpImageView() {
+        imageViewContainer.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        imageView.setDisable(true);
+        imageView.setOnMousePressed(e -> {
+            currentX = e.getX() * scale;
+            currentY = e.getY() * scale;
+            distanceX = imageView.getViewport().getMinX() + currentX;
+            distanceY = imageView.getViewport().getMinY() + currentY;
+        });
+
+        imageView.setOnMouseDragged(e -> {
+            dragged = true;
+            imageView.setViewport(
+                    new Rectangle2D(
+                            distanceX - e.getX() * scale,
+                            distanceY - e.getY() * scale,
+                            imageView.getFitWidth() * scale,
+                            imageView.getFitHeight() * scale));
+        });
+
+        imageView.setOnScroll(e -> {
+            scale += e.getDeltaY() < 0 ? 0.01 : -0.01;
+            if (scale > 2)
+                scale = 2;
+            if (scale <= 0.001) {
+                scale = 0.01;
+            }
+
+
+            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
+
+        });
+
+        imageView.setOnMouseClicked(e -> {
+            if (dragged) {
+                dragged = false;
+                return;
+            }
+            Color[] colors = getPixelColors(getRelativePosition(e));
+            if (colors != null) {
+                colorPickerOriginal.setValue(colors[0]);
+                colorPicker.setValue(colors[1]);
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    highlightColor();
+                }
+            }
+        });
+
+        imageView.setOnMouseMoved(e -> {
+            Color[] colors = getPixelColors(getRelativePosition(e));
+            if (colors != null) {
+                circleOriginal.setFill(colors[0]);
+                circle.setFill(colors[1]);
+            }
+        });
+    }
+
     //region Sorting
-
-    private void sortHue() {
-        sortHSBpart(0);
-    }
-
-
-    private void sortSaturation() {
-        sortHSBpart(1);
-
-    }
-
-    private void sortBrightness() {
-        sortHSBpart(2);
-    }
 
     private void sortHSBpart(int part) {
         ObservableList<Node> worklist = FXCollections.observableArrayList(sidePanel.getChildren());
@@ -220,69 +288,25 @@ public class MainWindowController implements Initializable {
     }
     //endregion
 
-    private void setUpImageView() {
-        imageView.setDisable(true);
-        imageView.setEffect(new DropShadow(5, Color.BLACK));
-        imageView.setOnMousePressed(e -> {
-            currentX = e.getX() * scale;
-            currentY = e.getY() * scale;
-            distanceX = imageView.getViewport().getMinX() + currentX;
-            distanceY = imageView.getViewport().getMinY() + currentY;
-        });
-
-        imageView.setOnMouseDragged(e ->
-                imageView.setViewport(
-                        new Rectangle2D(
-                                distanceX - e.getX() * scale,
-                                distanceY - e.getY() * scale,
-                                imageView.getFitWidth() * scale,
-                                imageView.getFitHeight() * scale))
-        );
-
-        imageView.setOnScroll(e -> {
-            scale += e.getDeltaY() < 0 ? 0.01 : -0.01;
-            System.out.println(scale);
-            if (scale > 2)
-                scale = 2;
-            if (scale <= 0.001) {
-                scale = 0.01;
-            }
-
-
-            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
-
-        });
-
-        imageView.setOnMouseClicked(e -> {
-            Color color = getPixelColor(getRelativePosition(e));
-            if (color != null)
-                colorPicker.setValue(color);
-        });
-
-        imageView.setOnMouseMoved(e -> {
-            Color color = getPixelColor(getRelativePosition(e));
-            if (color != null)
-                circle.setFill(color);
-        });
-    }
-
     //region Button actions
     @FXML
     void onOpenButtonAction() {
-        if (originalImage != null)
-            fileChooser.setInitialDirectory(originalImage.getParentFile());
-        originalImage = fileChooser.showOpenDialog(stage);
+        if (imageFile != null)
+            fileChooser.setInitialDirectory(imageFile.getParentFile());
+        imageFile = fileChooser.showOpenDialog(stage);
         WritableImage wimage = null;
-        if (originalImage == null)
+        if (imageFile == null)
             return;
-        try (FileInputStream is = new FileInputStream(originalImage)) {
-            Image img = new Image(is);
-            wimage = new WritableImage(img.getPixelReader(), (int) img.getWidth(), (int) img.getHeight());
+        try (FileInputStream is = new FileInputStream(imageFile)) {
+            original = new Image(is);
+            wimage = new WritableImage(original.getPixelReader(), (int) original.getWidth(), (int) original.getHeight());
 
         } catch (IOException e1) {
             e1.printStackTrace();
         }
         if (wimage != null) {
+            btnFindAllUniquePixels.setDisable(false);
+            btnRemoveSelectedColors.setDisable(true);
             scale = 1;
             image = wimage;
             imageView.setSmooth(true);
@@ -298,12 +322,12 @@ public class MainWindowController implements Initializable {
 
     @FXML
     void onSaveButtonAction() {
-        writeImage(originalImage);
+        writeImage(imageFile);
     }
 
     @FXML
     void onSaveAsButtonAction() {
-        fileChooser.setInitialDirectory(originalImage.getParentFile());
+        fileChooser.setInitialDirectory(imageFile.getParentFile());
         File file = fileChooser.showSaveDialog(stage);
         writeImage(file);
     }
@@ -316,8 +340,34 @@ public class MainWindowController implements Initializable {
     @FXML
     void onRemoveSelectedColorsAction() {
         sidePanel.getChildren().clear();
+        btnFindAllUniquePixels.setDisable(false);
+        btnRemoveSelectedColors.setDisable(true);
+        comboBoxSort.setDisable(true);
     }
 
+    @FXML
+    void onFindUniquePixels() {
+        Task task = createFindTask();
+
+        ProgressBar progressBar = new ProgressBar(0);
+        AnchorPane.setBottomAnchor(progressBar, 5d);
+        AnchorPane.setLeftAnchor(progressBar, imageView.getFitWidth() / 2);
+        mainPane.getChildren().add(progressBar);
+        progressBar.progressProperty().bind(task.progressProperty());
+
+        task.setOnSucceeded(e -> {
+            mainPane.getChildren().remove(progressBar);
+            btnRemoveSelectedColors.setDisable(false);
+            btnFindAllUniquePixels.setDisable(true);
+            comboBoxSort.setDisable(false);
+            Toast.create(mainPane, Toast.DURATION_LONG, "Colors found:" + String.valueOf(sidePanel.getChildren().size()));
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+    }
 
     @FXML
     void onRGBTabButtonAction() {
@@ -334,30 +384,36 @@ public class MainWindowController implements Initializable {
         changeAllTabs(2);
     }
 
-    private void changeAllTabs(int i) {
-        sidePanel.getChildren().forEach(node -> ((ColorNode) node).changeTab(i));
-    }
     //endregion
 
     @FXML
-    void onFindUniquePixels() {
-        Task task = createFindTask();
+    private void onAdditionalInfoChange() {
+        additionalInfoContainer.setVisible(additionalInfo.isSelected());
+        additionalInfoContainerOriginal.setVisible(additionalInfoOriginal.isSelected());
+    }
 
-        ProgressBar progressBar = new ProgressBar(0);
-        AnchorPane.setBottomAnchor(progressBar, 5d);
-        AnchorPane.setLeftAnchor(progressBar, imageView.getFitWidth() / 2);
-        mainPane.getChildren().add(progressBar);
-        progressBar.progressProperty().bind(task.progressProperty());
+    private void changeAllTabs(int i) {
+        sidePanel.getChildren().forEach(node -> ((ColorNode) node).changeTab(i));
+    }
 
-        task.setOnSucceeded(e -> {
-            mainPane.getChildren().remove(progressBar);
-            Toast.create(mainPane, Toast.DURATION_LONG, "Colors found:" + String.valueOf(sidePanel.getChildren().size()));
-        });
+    private void highlightColor() {
+        boolean colorFound = false;
+        int count = sidePanel.getChildren().size();
+        for (int i = 0; i < count; i++) {
+            ColorNode node = (ColorNode) sidePanel.getChildren().get(i);
+            if (node.getOriginalColor().equals(colorPickerOriginal.getValue())) {
+                node.setBorder(new Border(new BorderStroke(Color.ROYALBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
 
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+                double scrollValue = i == count - 1 ? 1 : (double) i / count;
 
+                scrollPane.setVvalue(scrollValue);
+                colorFound = true;
+            } else {
+                node.setBorder(Border.EMPTY);
+            }
+        }
+        if (!colorFound)
+            Toast.create(mainPane, Toast.DURATION_SHORT, "Color not added for edit.");
     }
 
     private Task<Map<Color, ColorNode>> createFindTask() {
@@ -373,23 +429,15 @@ public class MainWindowController implements Initializable {
                         Point2D coords = new Point2D(x, y);
                         if (pixels.containsKey(current)) {
                             pixels.get(current).addPixel(coords);
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pixels.get(current).updatePixelCount();
-                                }
-                            });
+                            Platform.runLater(() -> pixels.get(current).updatePixelCount());
                         } else {
                             ColorNode clrNode = new ColorNode(image);
                             clrNode.setOriginalColor(current);
                             clrNode.findButtonDisable(true);
                             clrNode.addPixel(coords);
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    sidePanel.getChildren().add(clrNode);
-                                    clrNode.updatePixelCount();
-                                }
+                            Platform.runLater(() -> {
+                                sidePanel.getChildren().add(clrNode);
+                                clrNode.updatePixelCount();
                             });
                             pixels.put(current, clrNode);
                         }
@@ -410,40 +458,6 @@ public class MainWindowController implements Initializable {
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
-    }
-
-    @FXML
-    private void onAdditionalInfoChange() {
-        additionalInfoContainer.setVisible(additionalInfo.isSelected());
-    }
-
-    private void setUpContextMenu() {
-        contextMenu = new ContextMenu();
-        MenuItem item1 = new MenuItem("Add for change..");
-        MenuItem item2 = new MenuItem("Copy HEX Code to Clipboard");
-        MenuItem item3 = new MenuItem("Copy RGB Values to Clipboard");
-        item1.setOnAction(e -> {
-            Color clr = colorPicker.getValue();
-            boolean alreadySelected = false;
-            for (int i = 0; i < sidePanel.getChildren().size(); i++) {
-                ColorNode colorNode = (ColorNode) sidePanel.getChildren().get(i);
-                alreadySelected = colorNode.getOriginalColor().equals(clr);
-            }
-
-            if (alreadySelected) {
-                Toast.create(mainPane, Toast.DURATION_SHORT, "Color already selected!");
-                return;
-
-            }
-
-            ColorNode clrNode = new ColorNode((WritableImage) imageView.getImage());
-            clrNode.setFocusTraversable(false);
-            clrNode.setOriginalColor(clr);
-            sidePanel.getChildren().add(clrNode);
-        });
-        // TODO: Clipboard Copying
-        contextMenu.getItems().addAll(item1, item2, item3);
-        imageView.setOnContextMenuRequested(e -> contextMenu.show(stage, e.getSceneX(), e.getSceneY()));
     }
 
     //region Position and Pixel helpers
@@ -471,7 +485,8 @@ public class MainWindowController implements Initializable {
         return new Point2D(xImage, yImage);
     }
 
-    private Color getPixelColor(Point2D point) {
+    private Color[] getPixelColors(Point2D point) {
+        Color[] result = new Color[2];
         int x = (int) point.getX();
         int y = (int) point.getY();
 
@@ -485,12 +500,16 @@ public class MainWindowController implements Initializable {
                 updateAdditionalInfo(-1, -1, null);
             return null;
         }
-        Color color = imageView.getImage().getPixelReader().getColor(x, y);
+        result[0] = original.getPixelReader().getColor(x, y);
+        result[1] = image.getPixelReader().getColor(x, y);
 
         if (additionalInfo.isSelected())
-            updateAdditionalInfo(x, y, color);
+            updateAdditionalInfo(x, y, result[0]);
+        if (additionalInfoOriginal.isSelected())
+            updateAdditionalInfoOriginal(x, y, result[1]);
 
-        return color;
+
+        return result;
 
     }
     //endregion
@@ -505,6 +524,18 @@ public class MainWindowController implements Initializable {
         hueLabel.setText(String.valueOf(clr == null ? "none" : f.format(clr.getHue())));
         saturationLabel.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getSaturation())));
         brightnessLabel.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getBrightness())));
+    }
+
+    private void updateAdditionalInfoOriginal(int x, int y, Color clr) {
+        posXLabelOriginal.setText(String.valueOf(x));
+        posYLabelOriginal.setText(String.valueOf(y));
+        alphaLabelOriginal.setText(String.valueOf(clr == null ? "none" : f.format(clr.getOpacity() * 255)));
+        redLabelOriginal.setText(String.valueOf(clr == null ? "none" : f.format(clr.getRed() * 255)));
+        greenLabelOriginal.setText(String.valueOf(clr == null ? "none" : f.format(clr.getGreen() * 255)));
+        blueLabelOriginal.setText(String.valueOf(clr == null ? "none" : f.format(clr.getBlue() * 255)));
+        hueLabelOriginal.setText(String.valueOf(clr == null ? "none" : f.format(clr.getHue())));
+        saturationLabelOriginal.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getSaturation())));
+        brightnessLabelOriginal.setText(String.valueOf(clr == null ? "none" : fPercent.format(clr.getBrightness())));
     }
 
     public void setStage(Stage stage) {
