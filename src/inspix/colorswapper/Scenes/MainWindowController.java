@@ -89,7 +89,7 @@ public class MainWindowController implements Initializable {
     private Stage stage;
     boolean dragged;
     FileChooser fileChooser = new FileChooser();
-    double currentX, currentY, distanceX, distanceY, scale, scaleFit;
+    double currentX, currentY, distanceX, distanceY, scale, scaleFit, scaleMultiplier = 0.01;
     DecimalFormat f = new DecimalFormat("#.##");
     DecimalFormat fPercent = new DecimalFormat("#.##%");
     //endregion
@@ -165,6 +165,7 @@ public class MainWindowController implements Initializable {
             clrNode.setOriginalColor(clr);
             sidePanel.getChildren().add(clrNode);
             comboBoxSort.setDisable(false);
+            btnRemoveSelectedColors.setDisable(false);
             btnFindAllUniquePixels.setDisable(true);
         });
         // TODO: Clipboard Copying
@@ -173,6 +174,15 @@ public class MainWindowController implements Initializable {
     }
 
     private void setUpImageView() {
+        mainPane.setOnKeyPressed(event -> {
+            if (event.isControlDown())
+                scaleMultiplier = 0.1;
+        });
+
+        mainPane.setOnKeyReleased(event -> {
+            scaleMultiplier = 0.01;
+        });
+
         imageViewContainer.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         imageView.setDisable(true);
         imageView.setOnMousePressed(e -> {
@@ -193,7 +203,7 @@ public class MainWindowController implements Initializable {
         });
 
         imageView.setOnScroll(e -> {
-            scale += e.getDeltaY() < 0 ? 0.01 : -0.01;
+            scale += e.getDeltaY() < 0 ? scaleMultiplier : (-scaleMultiplier);
             if (scale > 2)
                 scale = 2;
             if (scale <= 0.001) {
@@ -312,6 +322,8 @@ public class MainWindowController implements Initializable {
             imageView.setSmooth(true);
             imageView.setDisable(false);
             imageView.setImage(wimage);
+            imageView.setFitWidth(imageViewContainer.getWidth());
+            imageView.setFitHeight(imageViewContainer.getHeight());
             imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
             scaleFit = wimage.getWidth() / imageView.getFitWidth();
             sidePanel.getChildren().remove(0, sidePanel.getChildren().size());

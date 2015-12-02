@@ -6,10 +6,11 @@ A simple application to quickly change selected color from an image to another. 
 ### Features
 - You can chose multiple colors at once
 - Loaded image updated on color change
-- RGB,HSB Color manipulation, setting with HEX on my TODO list.
+- RGB,HSB Color manipulation, setting with HEX on my TODO list (use JavaFX color picker for Hex atm).
 - Useful tooltip on the selected colors for easy comparison.
 - Live preview.
 - You can click on the color preview to change the values back to the original color.
+- Hold CTRL to scale faster.
 
 ###### To do:
 1. ~~Save changes to source file or to other.~~

@@ -124,6 +124,12 @@ public class ColorNode extends AnchorPane implements Initializable {
             setDestinationColor(colorPicker.getValue());
             colorPicker.requestFocus();
         });
+
+        colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            setDestinationColor(newValue);
+            if (liveUpdateEnabled)
+                writePixels();
+        });
         setUpRectangles(originalColorRectangle, "Original Color");
         setUpRectangles(destinationColorRectangle, "Destination Color");
         setUpSpinners();
