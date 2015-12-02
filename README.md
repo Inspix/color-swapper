@@ -12,6 +12,9 @@ A simple application to quickly change selected color from an image to another. 
 - You can click on the color preview to change the values back to the original color.
 - Hold CTRL to scale faster.
 
+## Demo
+[![Demo](http://img.youtube.com/vi/11zcP0tbWuQ/0.jpg)](https://www.youtube.com/watch?v=11zcP0tbWuQ)
+
 ###### To do:
 1. ~~Save changes to source file or to other.~~
 2. ~~Option to find and extract all of the unique colors in an image.~~
@@ -19,3 +22,5 @@ A simple application to quickly change selected color from an image to another. 
 3. Palette tweaks to every selected color at once( hue, saturation, opacity etc.)
 4. ~~Better looking ui.~~
 5. Pixel smoothing remove, seems that JavaFX ImageView does some smoothing even if it's disabled.
+
+
