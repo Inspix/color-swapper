@@ -13,6 +13,7 @@
 
 package inspix.colorswapper.Controls;
 
+import inspix.colorswapper.Scenes.MainWindowController;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableArray;
 import javafx.concurrent.Task;
@@ -22,6 +23,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -47,7 +49,8 @@ public class ColorNode extends AnchorPane implements Initializable {
     private SpinnerValueFactory.DoubleSpinnerValueFactory brightnessSpinnerValue;
     private SpinnerValueFactory.DoubleSpinnerValueFactory alphaSpinnerValue;
     private ArrayList<Point2D> pixels;
-    private WritableImage image;
+    private Image image;
+    private MainWindowController controller;
 
     @FXML
     private TextField hexTextField;
@@ -102,8 +105,9 @@ public class ColorNode extends AnchorPane implements Initializable {
         }
     }
 
-    public ColorNode(WritableImage image) {
+    public ColorNode(Image image, MainWindowController controller) {
         this();
+        this.controller = controller;
         this.pixels = new ArrayList<>();
         this.image = image;
     }
@@ -402,10 +406,7 @@ public class ColorNode extends AnchorPane implements Initializable {
 
     private void writePixels(Color destination) {
         if (pixels.size() > 0)
-            for (int i = 0; i < pixels.size(); i++) {
-                Point2D pixel = pixels.get(i);
-                image.getPixelWriter().setColor((int) pixel.getX(), (int) pixel.getY(), destination);
-            }
+            controller.writePixels(destination,pixels);
     }
 
     private int validateValue(String text, TextField editor) {

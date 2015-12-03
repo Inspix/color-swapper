@@ -29,9 +29,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -56,7 +54,7 @@ public class MainWindowController implements Initializable {
     @FXML
     AnchorPane mainPane;
     @FXML
-    Button btnOpenFile, btnSave, btnSaveAs, btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors;
+    Button btnOpenFile, btnSave, btnSaveAs, btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors,btnRescale;
     @FXML
     ImageView imageView;
     @FXML
@@ -66,7 +64,7 @@ public class MainWindowController implements Initializable {
     @FXML
     CheckBox additionalInfo, additionalInfoOriginal;
     @FXML
-    ComboBox<String> comboBoxSort;
+    ComboBox<String> comboBoxSort,resampleComboBox;
     @FXML
     GridPane additionalInfoContainer, additionalInfoContainerOriginal;
     @FXML
@@ -82,14 +80,14 @@ public class MainWindowController implements Initializable {
     //endregion
 
     //region Fields
-    private WritableImage image;
+    private WritableImage image, resampled;
     private Image original;
     private File imageFile;
     private ContextMenu contextMenu;
     private Stage stage;
     boolean dragged;
     FileChooser fileChooser = new FileChooser();
-    double currentX, currentY, distanceX, distanceY, scale, scaleFit, scaleMultiplier = 0.01;
+    double currentX, currentY, distanceX, distanceY, scale, scaleFit, scaleMultiplier = 0.01, resampleFactor = 1,chosenResample = 1;
     DecimalFormat f = new DecimalFormat("#.##");
     DecimalFormat fPercent = new DecimalFormat("#.##%");
     //endregion
@@ -97,6 +95,7 @@ public class MainWindowController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         scale = 1;
+        resampleFactor = 1;
         setUpContextMenu();
         setUpImageView();
         setUpChoiceBox();
@@ -141,6 +140,13 @@ public class MainWindowController implements Initializable {
                     break;
             }
         });
+
+        resampleComboBox.getItems().addAll("x1","x4","x8");
+        resampleComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            chosenResample = newValue.intValue() * 4;
+            if (chosenResample != resampleFactor)
+                btnRescale.setDisable(false);
+        });
     }
 
     private void setUpContextMenu() {
@@ -160,7 +166,7 @@ public class MainWindowController implements Initializable {
                 }
             }
 
-            ColorNode clrNode = new ColorNode((WritableImage) imageView.getImage());
+            ColorNode clrNode = new ColorNode(original, this);
             clrNode.setFocusTraversable(false);
             clrNode.setOriginalColor(clr);
             sidePanel.getChildren().add(clrNode);
@@ -172,6 +178,8 @@ public class MainWindowController implements Initializable {
         contextMenu.getItems().addAll(item1, item2, item3);
         imageView.setOnContextMenuRequested(e -> contextMenu.show(stage, e.getSceneX(), e.getSceneY()));
     }
+
+    private double[] scales = new double[]{4, 2, 1.5,0.75};
 
     private void setUpImageView() {
         mainPane.setOnKeyPressed(event -> {
@@ -186,32 +194,32 @@ public class MainWindowController implements Initializable {
         imageViewContainer.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         imageView.setDisable(true);
         imageView.setOnMousePressed(e -> {
-            currentX = e.getX() * scale;
-            currentY = e.getY() * scale;
-            distanceX = imageView.getViewport().getMinX() + currentX;
-            distanceY = imageView.getViewport().getMinY() + currentY;
+            currentX = e.getX() / scale;
+            currentY = e.getY() / scale;
+            distanceX = imageView.getViewport().getMinX() / resampleFactor + currentX;
+            distanceY = imageView.getViewport().getMinY() / resampleFactor + currentY;
         });
 
         imageView.setOnMouseDragged(e -> {
             dragged = true;
             imageView.setViewport(
                     new Rectangle2D(
-                            distanceX - e.getX() * scale,
-                            distanceY - e.getY() * scale,
-                            imageView.getFitWidth() * scale,
-                            imageView.getFitHeight() * scale));
+                            (distanceX - e.getX() / scale) * resampleFactor,
+                            (distanceY - e.getY() / scale) * resampleFactor,
+                            (imageView.getFitWidth() / scale) * resampleFactor,
+                            (imageView.getFitHeight() / scale) * resampleFactor)
+            );
         });
 
         imageView.setOnScroll(e -> {
-            scale += e.getDeltaY() < 0 ? scaleMultiplier : (-scaleMultiplier);
-            if (scale > 2)
-                scale = 2;
+            scale += e.getDeltaY() > 0 ? scaleMultiplier : (-scaleMultiplier);
+            if (scale > 15)
+                scale = 15;
             if (scale <= 0.001) {
                 scale = 0.01;
             }
 
-
-            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
+            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), (imageView.getFitWidth() / scale) * resampleFactor, (imageView.getFitHeight() / scale) * resampleFactor));
 
         });
 
@@ -237,6 +245,60 @@ public class MainWindowController implements Initializable {
                 circle.setFill(colors[1]);
             }
         });
+    }
+
+    @FXML
+    private void onResampleButtonAction() {
+        Rectangle2D r = imageView.getViewport();
+
+        if (chosenResample == 0){
+            resampled = image;
+            imageView.setImage(resampled);
+            imageView.setViewport(new Rectangle2D(
+                    r.getMinX() / resampleFactor,
+                    r.getMinY() / resampleFactor,
+                    r.getWidth() / resampleFactor,
+                    r.getHeight() / resampleFactor));
+            resampleFactor = 1;
+
+            Toast.create(mainPane, Toast.DURATION_SHORT, "Resampled x" + resampleFactor);
+            btnRescale.setDisable(true);
+            return;
+        }
+
+        resampled = resample(image, ((int) chosenResample));
+        imageView.setImage(resampled);
+
+
+        if (chosenResample < resampleFactor)
+        {
+            double factor = scales[(int) chosenResample / 4];
+            if (resampleFactor - chosenResample > 4){
+                factor *=4;
+            }
+            imageView.setViewport(new Rectangle2D(
+                    r.getMinX() / factor,
+                    r.getMinY() / factor,
+                    r.getWidth() / factor,
+                    r.getHeight() / factor));
+        }
+        else
+        {
+            double factor = scales[(int) chosenResample / 4 - 1];
+            if (chosenResample - resampleFactor > 4){
+                factor *=4;
+            }
+            imageView.setViewport(new Rectangle2D(
+                    r.getMinX() * factor,
+                    r.getMinY() * factor,
+                    r.getWidth() * factor,
+                    r.getHeight() * factor));
+        }
+        resampleFactor = chosenResample;
+
+        Toast.create(mainPane, Toast.DURATION_SHORT, "Resampled x" + resampleFactor);
+        btnRescale.setDisable(true);
+
     }
 
     //region Sorting
@@ -304,31 +366,64 @@ public class MainWindowController implements Initializable {
         if (imageFile != null)
             fileChooser.setInitialDirectory(imageFile.getParentFile());
         imageFile = fileChooser.showOpenDialog(stage);
-        WritableImage wimage = null;
         if (imageFile == null)
             return;
         try (FileInputStream is = new FileInputStream(imageFile)) {
             original = new Image(is);
-            wimage = new WritableImage(original.getPixelReader(), (int) original.getWidth(), (int) original.getHeight());
+            image = new WritableImage(original.getPixelReader(), (int) original.getWidth(), (int) original.getHeight());
 
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        if (wimage != null) {
+        if (image != null) {
             btnFindAllUniquePixels.setDisable(false);
             btnRemoveSelectedColors.setDisable(true);
             scale = 1;
-            image = wimage;
+            resampleFactor = 1;
             imageView.setSmooth(true);
             imageView.setDisable(false);
-            imageView.setImage(wimage);
+            imageView.setImage(image);
             imageView.setFitWidth(imageViewContainer.getWidth());
             imageView.setFitHeight(imageViewContainer.getHeight());
             imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
-            scaleFit = wimage.getWidth() / imageView.getFitWidth();
+            scaleFit = image.getWidth() / imageView.getFitWidth();
             sidePanel.getChildren().remove(0, sidePanel.getChildren().size());
             btnSave.setDisable(false);
             btnSaveAs.setDisable(false);
+        }
+    }
+
+    private static WritableImage resample(Image img, int magnitude) {
+        WritableImage result = new WritableImage((int) img.getWidth() * magnitude, (int) img.getHeight() * magnitude);
+        PixelReader r = img.getPixelReader();
+        PixelWriter w = result.getPixelWriter();
+        for (int ix = 0; ix < img.getWidth(); ix++) {
+            for (int iy = 0; iy < img.getHeight(); iy++) {
+                Color current = r.getColor(ix, iy);
+                for (int nx = ix * magnitude; nx < ix * magnitude + magnitude; nx++) {
+                    for (int ny = iy * magnitude; ny < iy * magnitude + magnitude; ny++) {
+                        w.setColor(nx, ny, current);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+
+    public void writePixels(Color clr, ArrayList<Point2D> pixels) {
+        for (int i = 0; i < pixels.size(); i++) {
+            Point2D pixel = pixels.get(i);
+            image.getPixelWriter().setColor((int) pixel.getX(), (int) pixel.getY(), clr);
+            if (resampled == null)
+                continue;
+            int x = (int) pixel.getX() * (int) resampleFactor;
+            int y = (int) pixel.getY() * (int) resampleFactor;
+            for (int j = 0; j < resampleFactor; j++) {
+                for (int k = 0; k < resampleFactor; k++) {
+                    resampled.getPixelWriter().setColor(j + x, k + y, clr);
+                }
+            }
         }
     }
 
@@ -341,6 +436,8 @@ public class MainWindowController implements Initializable {
     void onSaveAsButtonAction() {
         fileChooser.setInitialDirectory(imageFile.getParentFile());
         File file = fileChooser.showSaveDialog(stage);
+        if (file== null)
+            return;
         writeImage(file);
     }
 
@@ -443,7 +540,7 @@ public class MainWindowController implements Initializable {
                             pixels.get(current).addPixel(coords);
                             Platform.runLater(() -> pixels.get(current).updatePixelCount());
                         } else {
-                            ColorNode clrNode = new ColorNode(image);
+                            ColorNode clrNode = new ColorNode(original, MainWindowController.this);
                             clrNode.setOriginalColor(current);
                             clrNode.findButtonDisable(true);
                             clrNode.addPixel(coords);
@@ -486,13 +583,13 @@ public class MainWindowController implements Initializable {
         if (imageView.getImage() == null) {
             return null;
         }
-        double viewPortX = imageView.getViewport().getMinX();
-        double viewPortY = imageView.getViewport().getMinY();
+        double viewPortX = imageView.getViewport().getMinX() / resampleFactor;
+        double viewPortY = imageView.getViewport().getMinY() / resampleFactor;
         double xClicked = coords.getX();
         double yClicked = coords.getY();
 
-        int xImage = (int) ((xClicked * scale) + viewPortX);
-        int yImage = (int) ((yClicked * scale) + viewPortY);
+        int xImage = (int) ((xClicked / scale) + viewPortX);
+        int yImage = (int) ((yClicked / scale) + viewPortY);
 
         return new Point2D(xImage, yImage);
     }
@@ -502,12 +599,12 @@ public class MainWindowController implements Initializable {
         int x = (int) point.getX();
         int y = (int) point.getY();
 
-        if (x >= imageView.getImage().getWidth() || x < 0) {
+        if (x >= original.getWidth() || x < 0) {
             if (additionalInfo.isSelected())
                 updateAdditionalInfo(-1, -1, null);
             return null;
         }
-        if (y >= imageView.getImage().getHeight() || y < 0) {
+        if (y >= original.getHeight() || y < 0) {
             if (additionalInfo.isSelected())
                 updateAdditionalInfo(-1, -1, null);
             return null;
