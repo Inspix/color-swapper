@@ -15,6 +15,7 @@ A simple application to quickly change selected color from an image to another. 
 
 ## Demo
 [![Demo](http://img.youtube.com/vi/11zcP0tbWuQ/0.jpg)](https://www.youtube.com/watch?v=11zcP0tbWuQ)
+[![Demo](http://img.youtube.com/vi/gH20dKyjbSk/0.jpg)](https://youtu.be/gH20dKyjbSk)
 
 ###### To do:
 1. ~~Save changes to source file or to other.~~
