@@ -53,8 +53,10 @@ public class MainWindowController implements Initializable {
     //region FXML Fields
     @FXML
     AnchorPane mainPane;
+
     @FXML
-    Button btnOpenFile, btnSave, btnSaveAs, btnFindAllUniquePixels, btnResetChanges, btnRemoveSelectedColors,btnRescale;
+    MenuItem menuOpen,menuSave,menuSaveAs,menuClose,menuExit,menuFindAll,menuReset,menuRemoveSelected,menuResamplex1,menuResamplex4,menuResamplex8;
+
     @FXML
     ImageView imageView;
     @FXML
@@ -64,7 +66,7 @@ public class MainWindowController implements Initializable {
     @FXML
     CheckBox additionalInfo, additionalInfoOriginal;
     @FXML
-    ComboBox<String> comboBoxSort,resampleComboBox;
+    ComboBox<String> comboBoxSort;
     @FXML
     GridPane additionalInfoContainer, additionalInfoContainerOriginal;
     @FXML
@@ -99,6 +101,7 @@ public class MainWindowController implements Initializable {
         setUpContextMenu();
         setUpImageView();
         setUpChoiceBox();
+        setUpMenu();
         DropShadow shadow = new DropShadow(BlurType.ONE_PASS_BOX, Color.color(0, 0, 0, 0.5), 2, 0, 2, 2);
 
         circle.setEffect(shadow);
@@ -108,6 +111,25 @@ public class MainWindowController implements Initializable {
         FileChooser.ExtensionFilter png = new FileChooser.ExtensionFilter("Portable Network Graphics", "*.png");
         fileChooser.getExtensionFilters().add(png);
         fileChooser.setSelectedExtensionFilter(png);
+    }
+
+    private void setUpMenu(){
+
+        menuResamplex1.setOnAction(event ->{
+                chosenResample = 0;
+                onResampleMenuAction();
+            }
+        );
+        menuResamplex4.setOnAction(event ->{
+                    chosenResample = 4;
+                    onResampleMenuAction();
+                }
+        );
+        menuResamplex8.setOnAction(event ->{
+                    chosenResample = 8;
+                    onResampleMenuAction();
+                }
+        );
     }
 
     private void setUpChoiceBox() {
@@ -140,13 +162,6 @@ public class MainWindowController implements Initializable {
                     break;
             }
         });
-
-        resampleComboBox.getItems().addAll("x1","x4","x8");
-        resampleComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-            chosenResample = newValue.intValue() * 4;
-            if (chosenResample != resampleFactor)
-                btnRescale.setDisable(false);
-        });
     }
 
     private void setUpContextMenu() {
@@ -171,12 +186,12 @@ public class MainWindowController implements Initializable {
             clrNode.setOriginalColor(clr);
             sidePanel.getChildren().add(clrNode);
             comboBoxSort.setDisable(false);
-            btnRemoveSelectedColors.setDisable(false);
-            btnFindAllUniquePixels.setDisable(true);
+            menuRemoveSelected.setDisable(false);
+            menuFindAll.setDisable(true);
         });
         // TODO: Clipboard Copying
         contextMenu.getItems().addAll(item1, item2, item3);
-        imageView.setOnContextMenuRequested(e -> contextMenu.show(stage, e.getSceneX(), e.getSceneY()));
+        imageView.setOnContextMenuRequested(e -> contextMenu.show(stage, e.getScreenX(), e.getScreenY()));
     }
 
     private double[] scales = new double[]{4, 2, 1.5,0.75};
@@ -247,8 +262,10 @@ public class MainWindowController implements Initializable {
         });
     }
 
+
+    //region Menu actions
     @FXML
-    private void onResampleButtonAction() {
+    private void onResampleMenuAction() {
         Rectangle2D r = imageView.getViewport();
 
         if (chosenResample == 0){
@@ -262,7 +279,9 @@ public class MainWindowController implements Initializable {
             resampleFactor = 1;
 
             Toast.create(mainPane, Toast.DURATION_SHORT, "Resampled x" + resampleFactor);
-            btnRescale.setDisable(true);
+            menuResamplex1.setDisable(true);
+            menuResamplex4.setDisable(false);
+            menuResamplex8.setDisable(false);
             return;
         }
 
@@ -272,6 +291,8 @@ public class MainWindowController implements Initializable {
 
         if (chosenResample < resampleFactor)
         {
+            System.out.println("Divide : " + (chosenResample / 4));
+
             double factor = scales[(int) chosenResample / 4];
             if (resampleFactor - chosenResample > 4){
                 factor *=4;
@@ -284,6 +305,7 @@ public class MainWindowController implements Initializable {
         }
         else
         {
+            System.out.println("Multiply : " + (chosenResample / 4 -1));
             double factor = scales[(int) chosenResample / 4 - 1];
             if (chosenResample - resampleFactor > 4){
                 factor *=4;
@@ -293,13 +315,103 @@ public class MainWindowController implements Initializable {
                     r.getMinY() * factor,
                     r.getWidth() * factor,
                     r.getHeight() * factor));
+
         }
         resampleFactor = chosenResample;
+        menuResamplex1.setDisable(false);
 
+        menuResamplex4.setDisable(resampleFactor == 4);
+        menuResamplex8.setDisable(resampleFactor == 8);
         Toast.create(mainPane, Toast.DURATION_SHORT, "Resampled x" + resampleFactor);
-        btnRescale.setDisable(true);
 
     }
+
+    @FXML
+    void onOpenMenuAction() {
+        if (imageFile != null)
+            fileChooser.setInitialDirectory(imageFile.getParentFile());
+        imageFile = fileChooser.showOpenDialog(stage);
+        if (imageFile == null)
+            return;
+        try (FileInputStream is = new FileInputStream(imageFile)) {
+            original = new Image(is);
+            image = new WritableImage(original.getPixelReader(), (int) original.getWidth(), (int) original.getHeight());
+
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        if (image != null) {
+            menuFindAll.setDisable(false);
+            menuRemoveSelected.setDisable(true);
+            scale = 1;
+            resampleFactor = 1;
+            imageView.setSmooth(true);
+            imageView.setDisable(false);
+            imageView.setImage(image);
+            imageView.setFitWidth(imageViewContainer.getWidth());
+            imageView.setFitHeight(imageViewContainer.getHeight());
+            imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
+            scaleFit = image.getWidth() / imageView.getFitWidth();
+            sidePanel.getChildren().remove(0, sidePanel.getChildren().size());
+            menuSave.setDisable(false);
+            menuSaveAs.setDisable(false);
+            menuFindAll.setDisable(false);
+            menuReset.setDisable(false);
+        }
+    }
+
+    @FXML
+    void onSaveMenuAction() {
+        writeImage(imageFile);
+    }
+
+    @FXML
+    void onSaveAsMenuAction() {
+        fileChooser.setInitialDirectory(imageFile.getParentFile());
+        File file = fileChooser.showSaveDialog(stage);
+        if (file== null)
+            return;
+        writeImage(file);
+    }
+
+    @FXML
+    void onResetChangesMenuAction() {
+        sidePanel.getChildren().forEach(node -> ((ColorNode) node).resetChanges());
+    }
+
+    @FXML
+    void onRemoveSelectedMenuAction() {
+        sidePanel.getChildren().clear();
+        menuFindAll.setDisable(false);
+        menuRemoveSelected.setDisable(true);
+        comboBoxSort.setDisable(true);
+    }
+
+    @FXML
+    void onFindAllMenuAction() {
+        Task task = createFindTask();
+
+        ProgressBar progressBar = new ProgressBar(0);
+        AnchorPane.setBottomAnchor(progressBar, 5d);
+        AnchorPane.setLeftAnchor(progressBar, imageView.getFitWidth() / 2);
+        mainPane.getChildren().add(progressBar);
+        progressBar.progressProperty().bind(task.progressProperty());
+
+        task.setOnSucceeded(e -> {
+            mainPane.getChildren().remove(progressBar);
+            menuRemoveSelected.setDisable(false);
+            menuFindAll.setDisable(true);
+            comboBoxSort.setDisable(false);
+            Toast.create(mainPane, Toast.DURATION_LONG, "Colors found:" + String.valueOf(sidePanel.getChildren().size()));
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+    }
+
+    //endregion
 
     //region Sorting
 
@@ -361,36 +473,28 @@ public class MainWindowController implements Initializable {
     //endregion
 
     //region Button actions
-    @FXML
-    void onOpenButtonAction() {
-        if (imageFile != null)
-            fileChooser.setInitialDirectory(imageFile.getParentFile());
-        imageFile = fileChooser.showOpenDialog(stage);
-        if (imageFile == null)
-            return;
-        try (FileInputStream is = new FileInputStream(imageFile)) {
-            original = new Image(is);
-            image = new WritableImage(original.getPixelReader(), (int) original.getWidth(), (int) original.getHeight());
 
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        if (image != null) {
-            btnFindAllUniquePixels.setDisable(false);
-            btnRemoveSelectedColors.setDisable(true);
-            scale = 1;
-            resampleFactor = 1;
-            imageView.setSmooth(true);
-            imageView.setDisable(false);
-            imageView.setImage(image);
-            imageView.setFitWidth(imageViewContainer.getWidth());
-            imageView.setFitHeight(imageViewContainer.getHeight());
-            imageView.setViewport(new Rectangle2D(0, 0, imageView.getFitWidth() * scale, imageView.getFitHeight() * scale));
-            scaleFit = image.getWidth() / imageView.getFitWidth();
-            sidePanel.getChildren().remove(0, sidePanel.getChildren().size());
-            btnSave.setDisable(false);
-            btnSaveAs.setDisable(false);
-        }
+    @FXML
+    void onRGBTabButtonAction() {
+        changeAllTabs(0);
+    }
+
+    @FXML
+    void onHSBTabButtonAction() {
+        changeAllTabs(1);
+    }
+
+    @FXML
+    void onHEXTabButtonAction() {
+        changeAllTabs(2);
+    }
+
+    //endregion
+
+    @FXML
+    private void onAdditionalInfoChange() {
+        additionalInfoContainer.setVisible(additionalInfo.isSelected());
+        additionalInfoContainerOriginal.setVisible(additionalInfoOriginal.isSelected());
     }
 
     private static WritableImage resample(Image img, int magnitude) {
@@ -425,80 +529,6 @@ public class MainWindowController implements Initializable {
                 }
             }
         }
-    }
-
-    @FXML
-    void onSaveButtonAction() {
-        writeImage(imageFile);
-    }
-
-    @FXML
-    void onSaveAsButtonAction() {
-        fileChooser.setInitialDirectory(imageFile.getParentFile());
-        File file = fileChooser.showSaveDialog(stage);
-        if (file== null)
-            return;
-        writeImage(file);
-    }
-
-    @FXML
-    void onResetChangesButtonAction() {
-        sidePanel.getChildren().forEach(node -> ((ColorNode) node).resetChanges());
-    }
-
-    @FXML
-    void onRemoveSelectedColorsAction() {
-        sidePanel.getChildren().clear();
-        btnFindAllUniquePixels.setDisable(false);
-        btnRemoveSelectedColors.setDisable(true);
-        comboBoxSort.setDisable(true);
-    }
-
-    @FXML
-    void onFindUniquePixels() {
-        Task task = createFindTask();
-
-        ProgressBar progressBar = new ProgressBar(0);
-        AnchorPane.setBottomAnchor(progressBar, 5d);
-        AnchorPane.setLeftAnchor(progressBar, imageView.getFitWidth() / 2);
-        mainPane.getChildren().add(progressBar);
-        progressBar.progressProperty().bind(task.progressProperty());
-
-        task.setOnSucceeded(e -> {
-            mainPane.getChildren().remove(progressBar);
-            btnRemoveSelectedColors.setDisable(false);
-            btnFindAllUniquePixels.setDisable(true);
-            comboBoxSort.setDisable(false);
-            Toast.create(mainPane, Toast.DURATION_LONG, "Colors found:" + String.valueOf(sidePanel.getChildren().size()));
-        });
-
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
-
-    }
-
-    @FXML
-    void onRGBTabButtonAction() {
-        changeAllTabs(0);
-    }
-
-    @FXML
-    void onHSBTabButtonAction() {
-        changeAllTabs(1);
-    }
-
-    @FXML
-    void onHEXTabButtonAction() {
-        changeAllTabs(2);
-    }
-
-    //endregion
-
-    @FXML
-    private void onAdditionalInfoChange() {
-        additionalInfoContainer.setVisible(additionalInfo.isSelected());
-        additionalInfoContainerOriginal.setVisible(additionalInfoOriginal.isSelected());
     }
 
     private void changeAllTabs(int i) {

@@ -22,12 +22,9 @@
   -->
 
 <AnchorPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="720.0" minWidth="1280.0" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="inspix.colorswapper.Scenes.MainWindowController">
-    <Button fx:id="btnOpenFile" layoutX="15.0" layoutY="14.0" mnemonicParsing="false" onAction="#onOpenButtonAction" prefHeight="25.0" prefWidth="92.0" text="Open File" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="7.0" />
-    <Button fx:id="btnSave" disable="true" layoutX="116.0" layoutY="7.0" mnemonicParsing="false" onAction="#onSaveButtonAction" text="Save" />
-    <Button fx:id="btnSaveAs" disable="true" layoutX="157.0" layoutY="7.0" mnemonicParsing="false" onAction="#onSaveAsButtonAction" text="Save as.." />
     <Circle fx:id="circle" fill="#ffffff00" layoutX="38.0" layoutY="680.0" radius="23.0" stroke="BLACK" strokeType="INSIDE" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="15.0" />
     <ColorPicker fx:id="colorPicker" layoutX="68.0" layoutY="678.0" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="68.0" />
-    <ScrollPane fx:id="scrollPane" layoutX="975.0" layoutY="39.0" prefHeight="676.0" prefWidth="295.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="980.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="39.0">
+    <ScrollPane fx:id="scrollPane" layoutX="981.0" layoutY="39.0" maxWidth="294.0" minHeight="-Infinity" minWidth="294.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="39.0">
         <VBox fx:id="sidePanel" alignment="TOP_CENTER" />
     </ScrollPane>
     <CheckBox fx:id="additionalInfo" alignment="CENTER" layoutX="68.0" layoutY="657.0" mnemonicParsing="false" onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Current Info" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="68.0" />
@@ -277,17 +274,6 @@
             </font>
         </Label>
     </GridPane>
-    <Button fx:id="btnResetChanges" layoutX="875.0" layoutY="579.0" mnemonicParsing="false" onAction="#onResetChangesButtonAction" prefHeight="25.0" prefWidth="125.0" text="Reset Changes" AnchorPane.bottomAnchor="105.0" AnchorPane.rightAnchor="311.0" />
-    <Button fx:id="btnRemoveSelectedColors" disable="true" layoutX="844.0" layoutY="619.0" mnemonicParsing="false" onAction="#onRemoveSelectedColorsAction" prefHeight="37.0" prefWidth="125.0" text="Remove Selected Colors" textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="64.0" AnchorPane.rightAnchor="311.0">
-        <font>
-            <Font size="10.0" />
-        </font>
-    </Button>
-    <Button fx:id="btnFindAllUniquePixels" layoutX="861.0" layoutY="660.0" mnemonicParsing="false" onAction="#onFindUniquePixels" prefHeight="37.0" prefWidth="125.0" text="Find All Unique Pixels" textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="23.0" AnchorPane.rightAnchor="311.0">
-        <font>
-            <Font size="10.0" />
-        </font>
-    </Button>
     <Button layoutX="1030.0" layoutY="7.0" mnemonicParsing="false" onAction="#onRGBTabButtonAction" text="RGB" AnchorPane.rightAnchor="221.0" AnchorPane.topAnchor="7.0" />
     <Button layoutX="1069.0" layoutY="7.0" mnemonicParsing="false" onAction="#onHSBTabButtonAction" text="HSB" AnchorPane.rightAnchor="178.0" AnchorPane.topAnchor="7.0" />
     <Button layoutX="1084.0" layoutY="7.0" mnemonicParsing="false" onAction="#onHEXTabButtonAction" text="HEX" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="7.0" />
@@ -303,7 +289,40 @@
     <ColorPicker fx:id="colorPickerOriginal" layoutX="69.0" layoutY="623.0" AnchorPane.bottomAnchor="72.0" AnchorPane.leftAnchor="69.0" />
     <CheckBox fx:id="additionalInfoOriginal" alignment="CENTER" layoutX="69.0" layoutY="602.0" mnemonicParsing="false" onAction="#onAdditionalInfoChange" prefHeight="17.0" prefWidth="125.0" text="Original Info" AnchorPane.bottomAnchor="101.0" AnchorPane.leftAnchor="69.0" />
     <ComboBox fx:id="comboBoxSort" disable="true" layoutX="1151.0" layoutY="7.0" prefHeight="25.0" prefWidth="125.0" promptText="Sorting" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="7.0" />
-   <Button fx:id="btnRescale" disable="true" layoutX="843.0" layoutY="7.0" mnemonicParsing="false" onAction="#onResampleButtonAction" text="Resample" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="7.0" />
-   <ComboBox fx:id="resampleComboBox" layoutX="918.0" layoutY="7.0" prefHeight="25.0" prefWidth="76.0" AnchorPane.rightAnchor="311.0" AnchorPane.topAnchor="7.0" />
+   <MenuBar layoutX="3.0" layoutY="7.0" prefHeight="25.0" prefWidth="980.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="0.0">
+     <menus>
+       <Menu mnemonicParsing="false" text="File">
+         <items>
+               <MenuItem fx:id="menuOpen" mnemonicParsing="false" onAction="#onOpenMenuAction" text="Open..." />
+           <MenuItem fx:id="menuSave" disable="true" mnemonicParsing="false" onAction="#onSaveMenuAction" text="Save" />
+               <MenuItem fx:id="menuSaveAs" disable="true" mnemonicParsing="false" onAction="#onSaveAsMenuAction" text="Save as..." />
+               <MenuItem fx:id="menuClose" mnemonicParsing="false" text="Close" />
+               <MenuItem fx:id="menuExit" mnemonicParsing="false" text="Exit" />
+         </items>
+       </Menu>
+       <Menu mnemonicParsing="false" text="Actions">
+         <items>
+           <MenuItem fx:id="menuFindAll" disable="true" mnemonicParsing="false" onAction="#onFindAllMenuAction" text="Find all unique colors" />
+               <MenuItem fx:id="menuReset" disable="true" mnemonicParsing="false" onAction="#onResetChangesMenuAction" text="Reset all changes" />
+               <MenuItem fx:id="menuRemoveSelected" disable="true" mnemonicParsing="false" onAction="#onRemoveSelectedMenuAction" text="Remove picked colors" />
+               <SeparatorMenuItem mnemonicParsing="false" />
+               <Menu mnemonicParsing="false" text="Re-sample">
+                 <items>
+                   <MenuItem fx:id="menuResamplex1" disable="true" mnemonicParsing="false" text="x1" />
+                     <MenuItem fx:id="menuResamplex4" mnemonicParsing="false" text="x4" />
+                     <MenuItem fx:id="menuResamplex8" mnemonicParsing="false" text="x8" />
+                 </items>
+               </Menu>
+         </items>
+       </Menu>
+       <Menu mnemonicParsing="false" text="Utils">
+         <items>
+           <MenuItem mnemonicParsing="false" text="Slicer" />
+               <MenuItem mnemonicParsing="false" text="Packer" />
+               <MenuItem mnemonicParsing="false" text="Grid Maker" />
+         </items>
+       </Menu>
+     </menus>
+   </MenuBar>
 
 </AnchorPane>
