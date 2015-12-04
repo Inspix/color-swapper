@@ -15,6 +15,7 @@ package inspix.colorswapper.Scenes;
 
 import inspix.colorswapper.Controls.ColorNode;
 import inspix.colorswapper.Utils.ColorHelpers;
+import inspix.colorswapper.Utils.ImageUtils;
 import inspix.colorswapper.Utils.Toast;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -22,10 +23,13 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
@@ -38,6 +42,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -202,9 +207,7 @@ public class MainWindowController implements Initializable {
                 scaleMultiplier = 0.1;
         });
 
-        mainPane.setOnKeyReleased(event -> {
-            scaleMultiplier = 0.01;
-        });
+        mainPane.setOnKeyReleased(event -> scaleMultiplier = 0.01);
 
         imageViewContainer.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         imageView.setDisable(true);
@@ -285,7 +288,7 @@ public class MainWindowController implements Initializable {
             return;
         }
 
-        resampled = resample(image, ((int) chosenResample));
+        resampled = ImageUtils.resample(image, ((int) chosenResample));
         imageView.setImage(resampled);
 
 
@@ -411,6 +414,17 @@ public class MainWindowController implements Initializable {
 
     }
 
+    @FXML
+    void onSlicerMenuAction() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Slicer.fxml"));
+        Parent root = loader.load();
+        SlicerController controller = loader.getController();
+        Stage newstage = new Stage(StageStyle.DECORATED);
+        newstage.setScene(new Scene(root));
+        controller.setStage(newstage);
+        newstage.show();
+    }
+
     //endregion
 
     //region Sorting
@@ -496,24 +510,6 @@ public class MainWindowController implements Initializable {
         additionalInfoContainer.setVisible(additionalInfo.isSelected());
         additionalInfoContainerOriginal.setVisible(additionalInfoOriginal.isSelected());
     }
-
-    private static WritableImage resample(Image img, int magnitude) {
-        WritableImage result = new WritableImage((int) img.getWidth() * magnitude, (int) img.getHeight() * magnitude);
-        PixelReader r = img.getPixelReader();
-        PixelWriter w = result.getPixelWriter();
-        for (int ix = 0; ix < img.getWidth(); ix++) {
-            for (int iy = 0; iy < img.getHeight(); iy++) {
-                Color current = r.getColor(ix, iy);
-                for (int nx = ix * magnitude; nx < ix * magnitude + magnitude; nx++) {
-                    for (int ny = iy * magnitude; ny < iy * magnitude + magnitude; ny++) {
-                        w.setColor(nx, ny, current);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
 
     public void writePixels(Color clr, ArrayList<Point2D> pixels) {
         for (int i = 0; i < pixels.size(); i++) {
