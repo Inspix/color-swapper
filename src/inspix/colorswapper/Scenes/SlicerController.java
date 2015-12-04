@@ -91,7 +91,7 @@ public class SlicerController implements Initializable {
         xValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, wmax);
         yValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, hmax);
         wValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, wmax);
-        hValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, wmax);
+        hValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, hmax);
         spinnerX.setValueFactory(xValue);
         spinnerY.setValueFactory(yValue);
         spinnerW.setValueFactory(wValue);
@@ -168,14 +168,14 @@ public class SlicerController implements Initializable {
 
         double w = wValue.getValue();
         double h = hValue.getValue();
-        double x = xValue.getValue() % h;
-        double y = yValue.getValue() % w;
+        double x = xValue.getValue() % w;
+        double y = yValue.getValue() % h;
 
-        double xBalance = h / w;
-        double yBalance = w / h;
+        double xBalance = w / h;
+        double yBalance = h / w;
 
-        int partsX = (int) Math.ceil((totalH / h) * xBalance);
-        int partsY = (int) Math.ceil((totalW / w) * yBalance);
+        int partsX = (int) Math.ceil((totalH / w) * xBalance);
+        int partsY = (int) Math.ceil((totalW / h) * yBalance);
 
         for (int i = 0; i < partsX; i++) {
             drawLine(
