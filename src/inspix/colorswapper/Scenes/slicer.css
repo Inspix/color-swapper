@@ -1,0 +1,18 @@
+
+
+.menu-bar {
+    -fx-background-color: #000, linear-gradient(to bottom, #000 0%, #aaa 100%);
+    -fx-background-insets: 0, 0 1 1 0;
+}
+
+.menu-bar .menu .label {
+    -fx-text-fill: white;
+}
+
+.menu-bar .menu .menu-item {
+    -fx-background-color: transparent;
+}
+
+.context-menu {
+    -fx-background-color: #888, linear-gradient(to bottom right,#000 0%, #aaa 100%);
+}
