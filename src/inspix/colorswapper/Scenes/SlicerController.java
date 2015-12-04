@@ -171,20 +171,17 @@ public class SlicerController implements Initializable {
         double x = xValue.getValue() % w;
         double y = yValue.getValue() % h;
 
-        double xBalance = w / h;
-        double yBalance = h / w;
+        int partsW = (int) Math.ceil((totalW / w));
+        int partsH = (int) Math.ceil((totalH / h));
 
-        int partsX = (int) Math.ceil((totalH / w) * xBalance);
-        int partsY = (int) Math.ceil((totalW / h) * yBalance);
-
-        for (int i = 0; i < partsX; i++) {
+        for (int i = 0; i < partsH; i++) {
             drawLine(
                     0,
                     i * h + y,
                     totalW,
                     i * h + y);
         }
-        for (int i = 0; i < partsY; i++) {
+        for (int i = 0; i < partsW; i++) {
             drawLine(
                     i * w + x,
                     0
