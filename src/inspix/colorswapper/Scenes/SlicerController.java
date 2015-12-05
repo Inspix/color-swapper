@@ -16,6 +16,7 @@ package inspix.colorswapper.Scenes;
 import com.sun.javafx.event.EventDispatchChainImpl;
 import inspix.colorswapper.Utils.ImageUtils;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
@@ -33,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,11 +67,13 @@ public class SlicerController implements Initializable {
     private File imageFile;
     private Stage stage;
     private Color lineColor;
+    private int gap;
 
     private double resampleFactor;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        gap = 2;
         lineColor = Color.rgb(0, 0, 0, 0.1);
         stackPane.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         setUpImageView();
@@ -108,6 +112,53 @@ public class SlicerController implements Initializable {
 
     private void onSpinnerChange(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
         onCutMenuAction();
+    }
+
+    private void slice() {
+        double totalW = image.getWidth();
+        double totalH = image.getHeight();
+        if (gap == 0)
+            gap = 1;
+        double w = wValue.getValue();
+        double h = hValue.getValue();
+        double x = xValue.getValue() % w;
+        double y = yValue.getValue() % h;
+
+        int partsW = (int) Math.ceil((totalW / w));
+        int partsH = (int) Math.ceil((totalH / h));
+
+        WritableImage result = new WritableImage((int) image.getWidth() + (partsW * gap), (int) image.getHeight() + (partsH * gap));
+        for (int partX = 0; partX < partsW; partX++) {
+            for (int partY = 0; partY < partsH; partY++) {
+                int cx = partX * (int) w + (int) x;
+                int cy = partY * (int) h + (int) y;
+                result.getPixelWriter().setPixels(cx + (partX * gap), cy + (partY * gap), (int) w, (int) h, image.getPixelReader(), cx, cy);
+                for (int i = 0; i < (int) h; i++) {
+                    for (int j = 0; j <= gap; j++) {
+                        int lx = cx + (int) w + (partX * gap) + j;
+                        int ly = cy + i + (partY * gap);
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                    }
+                }
+                for (int i = 0; i < (int) w + 2; i++) {
+                    for (int j = 0; j < gap; j++) {
+                        int lx = cx + i + (partX * gap);
+                        int ly = cy + (int) h + (partY * gap) + j;
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                    }
+                }
+            }
+        }
+
+        File file = new File("Test.png");
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(result, null),
+                    "png", file);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     @FXML
@@ -150,6 +201,9 @@ public class SlicerController implements Initializable {
                 yValue.setValue(yValue.getValue() + 1);
             else if (event.getCode() == KeyCode.UP)
                 yValue.setValue(yValue.getValue() - 1);
+
+            if (event.getCode() == KeyCode.S)
+                slice();
             onCutMenuAction();
         });
     }
