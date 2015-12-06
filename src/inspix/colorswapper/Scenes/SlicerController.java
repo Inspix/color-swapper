@@ -126,30 +126,80 @@ public class SlicerController implements Initializable {
 
         int partsW = (int) Math.ceil((totalW / w));
         int partsH = (int) Math.ceil((totalH / h));
+        int gapW = partsW * gap;
+        int gapH = partsH * gap;
+        int px, py;
+        if (x != 0) {
+            px = -1;
+            gapW += gap;
+        } else {
+            px = 0;
+        }
+        if (y != 0) {
+            py = -1;
+            gapH += gap;
+        } else {
+            py = 0;
+        }
+        int offsetX = 0;
+        int offsetY = 0;
 
-        WritableImage result = new WritableImage((int) image.getWidth() + (partsW * gap), (int) image.getHeight() + (partsH * gap));
-        for (int partX = 0; partX < partsW; partX++) {
-            for (int partY = 0; partY < partsH; partY++) {
-                int cx = partX * (int) w + (int) x;
-                int cy = partY * (int) h + (int) y;
-                result.getPixelWriter().setPixels(cx + (partX * gap), cy + (partY * gap), (int) w, (int) h, image.getPixelReader(), cx, cy);
-                for (int i = 0; i < (int) h; i++) {
-                    for (int j = 0; j <= gap; j++) {
-                        int lx = cx + (int) w + (partX * gap) + j;
-                        int ly = cy + i + (partY * gap);
-                        if (ly < result.getHeight() && lx < result.getWidth())
-                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
-                    }
-                }
-                for (int i = 0; i < (int) w + 2; i++) {
-                    for (int j = 0; j < gap; j++) {
-                        int lx = cx + i + (partX * gap);
-                        int ly = cy + (int) h + (partY * gap) + j;
-                        if (ly < result.getHeight() && lx < result.getWidth())
-                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
-                    }
-                }
+
+        WritableImage result = new WritableImage((int) image.getWidth() + gapW, (int) image.getHeight() + gapH);
+        int modX = (int) image.getWidth() % (int) w;
+        int modY = (int) image.getHeight() % (int) h;
+
+        System.out.println("ModX:" + modX);
+        System.out.println("ModY:" + modY);
+        for (int partX = px; partX < partsW; partX++) {
+            int cpartX = (partX == -1 ? 0 : partX);
+            int cw = (int) w;
+            int cx = cpartX * cw + (int) x;
+            if (partX == -1) {
+                cw = (int) x;
+                cx = 0;
+            } else if (partX == partsW - 1) {
+                if (modX == 0)
+                    cw = (int) w - (int) x;
+                else
+                    cw = modX - (int) x;
             }
+            for (int partY = py; partY < partsH; partY++) {
+                int cpartY = (partY == -1 ? 0 : partY);
+                int ch = (int) h;
+                int cy = cpartY * ch + (int) y;
+
+                if (partY == -1) {
+                    ch = (int) y;
+                    cy = 0;
+                } else if (partY == partsH - 1) {
+                    if (modY == 0)
+                        ch = (int) h - (int) y;
+                    else
+                        ch = modY - (int) y;
+                }
+
+                result.getPixelWriter().setPixels(cx + offsetX, cy + offsetY, cw, ch, image.getPixelReader(), cx, cy);
+                for (int i = 0; i < ch; i++) {
+                    for (int j = 0; j < gap; j++) {
+                        int lx = cx + cw + offsetX + j;
+                        int ly = cy + i + offsetY;
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                    }
+                }
+                for (int i = 0; i < cw + 2; i++) {
+                    for (int j = 0; j < gap; j++) {
+                        int lx = cx + i + offsetX;
+                        int ly = cy + ch + offsetY + j;
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                    }
+                }
+                offsetY += gap;
+            }
+            offsetX += gap;
+            offsetY = 0;
         }
 
         File file = new File("Test.png");
