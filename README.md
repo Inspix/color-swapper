@@ -10,12 +10,13 @@ A simple application to quickly change selected color from an image to another. 
 - Useful tooltip on the selected colors for easy comparison.
 - Live preview.
 - You can click on the color preview to change the values back to the original color.
-- Hold CTRL to scale faster.
+- Hold CTRL to scale faster.-
 - Re-sampling to make the image crispier on higher zoom levels.
 
 ## Demo
 [![Demo](http://img.youtube.com/vi/11zcP0tbWuQ/0.jpg)](https://www.youtube.com/watch?v=11zcP0tbWuQ)
 [![Demo](http://img.youtube.com/vi/gH20dKyjbSk/0.jpg)](https://youtu.be/gH20dKyjbSk)
+[![Demo](http://img.youtube.com/vi/2_1GwVtjlYs/0.jpg)](https://youtu.be/2_1GwVtjlYs)
 
 ###### To do:
 1. ~~Save changes to source file or to other.~~
