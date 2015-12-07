@@ -73,6 +73,7 @@ public class SlicerController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        resampleFactor = 4;
         gap = 2;
         lineColor = Color.rgb(0, 0, 0, 0.1);
         stackPane.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -149,8 +150,6 @@ public class SlicerController implements Initializable {
         int modX = (int) image.getWidth() % (int) w;
         int modY = (int) image.getHeight() % (int) h;
 
-        System.out.println("ModX:" + modX);
-        System.out.println("ModY:" + modY);
         for (int partX = px; partX < partsW; partX++) {
             int cpartX = (partX == -1 ? 0 : partX);
             int cw = (int) w;
@@ -230,6 +229,8 @@ public class SlicerController implements Initializable {
             imageView.setSmooth(true);
             imageView.setDisable(false);
             imageView.setImage(writableImage);
+            imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), (imageView.getFitWidth() / scale) * resampleFactor, (imageView.getFitHeight() / scale) * resampleFactor));
+
             setUpSpinners();
         }
     }
