@@ -1,36 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.image.*?>
 <?import java.net.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <VBox fx:id="parent" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="inspix.colorswapper.Scenes.SlicerController">
-  <children>
+
     <MenuBar VBox.vgrow="NEVER">
-      <menus>
         <Menu mnemonicParsing="false" text="File">
-          <items>
             <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem fx:id="menuOpen" mnemonicParsing="false" onAction="#onOpenMenuAction" text="Open…" />
+            <MenuItem mnemonicParsing="false" onAction="#onOpenMenuAction" text="Open…"/>
             <Menu mnemonicParsing="false" text="Open Recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
+            <MenuItem disable="true" fx:id="menuSave" onAction="#onSaveMenuAction" mnemonicParsing="false"
+                      text="Save"/>
+            <MenuItem disable="true" fx:id="menuSaveAs" onAction="#onSaveAsMenuAction" mnemonicParsing="false"
+                      text="Save As…"/>
+            <MenuItem disable="true" fx:id="menuSliceToParts" onAction="#onSplitToFilesMenuAction"
+                      mnemonicParsing="false" text="Extract parts..."/>
             <MenuItem mnemonicParsing="false" text="Revert" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Preferences…" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Quit" />
-          </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
-          <items>
             <MenuItem mnemonicParsing="false" text="Undo" />
             <MenuItem mnemonicParsing="false" text="Redo" />
             <SeparatorMenuItem mnemonicParsing="false" />
@@ -41,29 +39,22 @@
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Select All" />
             <MenuItem mnemonicParsing="false" text="Unselect All" />
-          </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
-          <items>
             <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
-          </items>
         </Menu>
-      </menus>
     </MenuBar>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
-      <children>
             <StackPane fx:id="stackPane" layoutX="14.0" layoutY="41.0" prefHeight="630.0" prefWidth="964.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="50.0">
-               <children>
-                 <ImageView fx:id="imageView" fitHeight="630.0" fitWidth="964.0" pickOnBounds="true" preserveRatio="true">
+
+                <ImageView fx:id="imageView" fitHeight="630.0" fitWidth="964.0" pickOnBounds="true" preserveRatio="true">
                    <viewport>
                      <Rectangle2D height="630.0" width="964.0" />
                    </viewport>
                  </ImageView>
                  <Canvas fx:id="canvas" height="630.0" width="964.0" />
-               </children>
             </StackPane>
             <ToolBar prefHeight="40.0" prefWidth="1280.0">
-              <items>
                   <ToggleButton onAction="#onTBtnGridAction" fx:id="tbtnGrid" mnemonicParsing="false" text="Grid" />
                   <Label text="X:" />
                   <Spinner disable="true" fx:id="spinnerX" prefHeight="25.0" prefWidth="75.0" />
@@ -73,11 +64,8 @@
                   <Spinner disable="true" fx:id="spinnerW" prefHeight="25.0" prefWidth="75.0" />
                   <Label text="H:" />
                   <Spinner disable="true" fx:id="spinnerH" prefHeight="25.0" prefWidth="75.0" />
-              </items>
             </ToolBar>
-      </children>
     </AnchorPane>
-  </children>
   <stylesheets>
     <URL value="@slicer.css" />
   </stylesheets>

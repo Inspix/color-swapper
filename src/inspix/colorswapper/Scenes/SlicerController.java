@@ -22,6 +22,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
@@ -56,6 +57,9 @@ public class SlicerController implements Initializable {
     @FXML
     Spinner<Integer> spinnerX, spinnerY, spinnerW, spinnerH;
 
+    @FXML
+    MenuItem menuSave, menuSaveAs, menuSliceToParts;
+
 
     private SpinnerValueFactory<Integer> xValue, yValue, wValue, hValue;
 
@@ -67,6 +71,7 @@ public class SlicerController implements Initializable {
     private File imageFile;
     private Stage stage;
     private Color lineColor;
+    private Color exportLineColor;
     private int gap;
 
     private double resampleFactor;
@@ -86,6 +91,9 @@ public class SlicerController implements Initializable {
 
         viewport = imageView.getViewport();
         g = canvas.getGraphicsContext2D();
+        FileChooser.ExtensionFilter png = new FileChooser.ExtensionFilter("Portable Network Graphics", "*.png");
+        fileChooser.getExtensionFilters().add(png);
+        fileChooser.setSelectedExtensionFilter(png);
     }
 
     private void setUpSpinners() {
@@ -101,8 +109,8 @@ public class SlicerController implements Initializable {
         spinnerY.setValueFactory(yValue);
         spinnerW.setValueFactory(wValue);
         spinnerH.setValueFactory(hValue);
-        spinnerX.setDisable(false);
-        spinnerY.setDisable(false);
+        spinnerX.setDisable(true);
+        spinnerY.setDisable(true);
         spinnerW.setDisable(false);
         spinnerH.setDisable(false);
         spinnerX.valueProperty().addListener(this::onSpinnerChange);
@@ -115,7 +123,124 @@ public class SlicerController implements Initializable {
         onCutMenuAction();
     }
 
-    private void slice() {
+    private WritableImage slice(File file) {
+        boolean writeToFile = false;
+        if (file != null)
+            writeToFile = true;
+        int currentPart = 0;
+        exportLineColor = Color.rgb(247, 119, 249, 1);
+
+        double totalW = image.getWidth();
+        double totalH = image.getHeight();
+        if (gap == 0)
+            gap = 1;
+        double w = wValue.getValue();
+        double h = hValue.getValue();
+        double x = xValue.getValue() % w;
+        double y = yValue.getValue() % h;
+
+        int partsW = (int) Math.ceil((totalW / w));
+        int partsH = (int) Math.ceil((totalH / h));
+        int gapW = partsW * gap;
+        int gapH = partsH * gap;
+        int px, py;
+        if (x != 0) {
+            px = -1;
+            gapW += gap;
+        } else {
+            px = 0;
+        }
+        if (y != 0) {
+            py = -1;
+            gapH += gap;
+        } else {
+            py = 0;
+        }
+        int offsetX = 0;
+        int offsetY = 0;
+
+
+        WritableImage result = new WritableImage((int) image.getWidth() + gapW, (int) image.getHeight() + gapH);
+        int modX = (int) image.getWidth() % (int) w;
+        int modY = (int) image.getHeight() % (int) h;
+
+        for (int partY = py; partY < partsH; partY++) {
+            int cpartY = (partY == -1 ? 0 : partY);
+            int ch = (int) h;
+            int cy = cpartY * ch + (int) y;
+
+            if (partY == -1) {
+                ch = (int) y;
+                cy = 0;
+            } else if (partY == partsH - 1) {
+                if (modY == 0)
+                    ch = (int) h - (int) y;
+                else
+                    ch = modY - (int) y;
+            }
+            for (int partX = px; partX < partsW; partX++) {
+                int cpartX = (partX == -1 ? 0 : partX);
+                int cw = (int) w;
+                int cx = cpartX * cw + (int) x;
+                if (partX == -1) {
+                    cw = (int) x;
+                    cx = 0;
+                } else if (partX == partsW - 1) {
+                    if (modX == 0)
+                        cw = (int) w - (int) x;
+                    else
+                        cw = modX - (int) x;
+                }
+                if (writeToFile) {
+
+                    currentPart++;
+                    WritableImage img = new WritableImage(image.getPixelReader(), cx, cy, cw, ch);
+                    String filename = file.getName().replace(".png", currentPart + ".png");
+                    File output = new File(file.getParentFile(), filename);
+                    try {
+                        ImageIO.write(SwingFXUtils.fromFXImage(img, null),
+                                "png", output);
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                    continue;
+                }
+
+                result.getPixelWriter().setPixels(cx + offsetX, cy + offsetY, cw, ch, image.getPixelReader(), cx, cy);
+                for (int i = 0; i < ch; i++) {
+                    for (int j = 0; j < gap; j++) {
+                        int lx = cx + cw + offsetX + j;
+                        int ly = cy + i + offsetY;
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, exportLineColor);
+                    }
+                }
+                for (int i = 0; i < cw + 2; i++) {
+                    for (int j = 0; j < gap; j++) {
+                        int lx = cx + i + offsetX;
+                        int ly = cy + ch + offsetY + j;
+                        if (ly < result.getHeight() && lx < result.getWidth())
+                            result.getPixelWriter().setColor(lx, ly, exportLineColor);
+                    }
+                }
+                offsetX += gap;
+
+            }
+            offsetY += gap;
+            offsetX = 0;
+        }
+
+        return result;
+    }
+
+    /* X > Y
+    private WritableImage slice(File file) {
+        boolean writeToFile = false;
+        if (file != null)
+            writeToFile = true;
+        int currentPart = 0;
+        exportLineColor = Color.rgb(247, 119, 249, 1);
+
         double totalW = image.getWidth();
         double totalH = image.getHeight();
         if (gap == 0)
@@ -178,13 +303,28 @@ public class SlicerController implements Initializable {
                         ch = modY - (int) y;
                 }
 
+                if (writeToFile){
+
+                    currentPart++;
+                    WritableImage img = new WritableImage(image.getPixelReader(),cx,cy,cw,ch);
+                    String filename = file.getName().replace(".png",currentPart + ".png");
+                    File output = new File(file.getParentFile(),filename);
+                    try {
+                        ImageIO.write(SwingFXUtils.fromFXImage(img, null),
+                                "png", output);
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                    continue;
+                }
+
                 result.getPixelWriter().setPixels(cx + offsetX, cy + offsetY, cw, ch, image.getPixelReader(), cx, cy);
                 for (int i = 0; i < ch; i++) {
                     for (int j = 0; j < gap; j++) {
                         int lx = cx + cw + offsetX + j;
                         int ly = cy + i + offsetY;
                         if (ly < result.getHeight() && lx < result.getWidth())
-                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                            result.getPixelWriter().setColor(lx, ly, exportLineColor);
                     }
                 }
                 for (int i = 0; i < cw + 2; i++) {
@@ -192,16 +332,41 @@ public class SlicerController implements Initializable {
                         int lx = cx + i + offsetX;
                         int ly = cy + ch + offsetY + j;
                         if (ly < result.getHeight() && lx < result.getWidth())
-                            result.getPixelWriter().setColor(lx, ly, Color.PINK);
+                            result.getPixelWriter().setColor(lx, ly, exportLineColor);
                     }
                 }
                 offsetY += gap;
+
             }
             offsetX += gap;
             offsetY = 0;
         }
 
-        File file = new File("Test.png");
+        return result;
+    }
+
+    */
+
+    @FXML
+    void onSaveMenuAction() {
+        WritableImage result = slice(null);
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(result, null),
+                    "png", imageFile);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        menuSave.setDisable(true);
+    }
+
+    @FXML
+    void onSaveAsMenuAction() {
+        fileChooser.setTitle("Save file...");
+        File file = fileChooser.showSaveDialog(stage);
+        if (file == null) {
+            return;
+        }
+        WritableImage result = slice(null);
         try {
             ImageIO.write(SwingFXUtils.fromFXImage(result, null),
                     "png", file);
@@ -211,7 +376,17 @@ public class SlicerController implements Initializable {
     }
 
     @FXML
+    void onSplitToFilesMenuAction() {
+        File file = fileChooser.showSaveDialog(stage);
+        if (file == null)
+            return;
+        slice(file);
+    }
+
+    @FXML
     void onOpenMenuAction() {
+
+        fileChooser.setTitle("Open Image...");
         if (imageFile != null)
             fileChooser.setInitialDirectory(imageFile.getParentFile());
         imageFile = fileChooser.showOpenDialog(stage);
@@ -230,7 +405,9 @@ public class SlicerController implements Initializable {
             imageView.setDisable(false);
             imageView.setImage(writableImage);
             imageView.setViewport(new Rectangle2D(imageView.getViewport().getMinX(), imageView.getViewport().getMinY(), (imageView.getFitWidth() / scale) * resampleFactor, (imageView.getFitHeight() / scale) * resampleFactor));
-
+            menuSave.setDisable(false);
+            menuSaveAs.setDisable(false);
+            menuSliceToParts.setDisable(false);
             setUpSpinners();
         }
     }
@@ -254,7 +431,7 @@ public class SlicerController implements Initializable {
                 yValue.setValue(yValue.getValue() - 1);
 
             if (event.getCode() == KeyCode.S)
-                slice();
+                slice(null);
             onCutMenuAction();
         });
     }
